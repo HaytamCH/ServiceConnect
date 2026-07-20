@@ -1,0 +1,238 @@
+@import './styles/base.css';
+@import './styles/layout.css';
+@import './styles/home.css';
+@import './styles/search-results.css';
+@import './styles/annonce-detail.css';
+@import './styles/provider-profile.css';
+@import './styles/auth.css';
+@import './styles/account.css';
+@import './styles/member.css';
+@import './styles/prestataire.css';
+@import './styles/become-provider.css';
+@import './styles/legal.css';
+@import './styles/admin.css';
+
+
+
+.language-switcher {
+  height: 38px;
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+  padding: 0 10px;
+  background: #ffffff;
+  color: #2563eb;
+  font-weight: 800;
+  cursor: pointer;
+  outline: none;
+}
+
+.language-switcher:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.cookie-banner {
+  position: fixed;
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+  z-index: 9999;
+  background: #ffffff;
+  border: 1px solid #dbe2ea;
+  border-radius: 18px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
+  padding: 22px;
+}
+
+.cookie-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.cookie-text {
+  flex: 1;
+}
+
+.cookie-text h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  color: #07142f;
+}
+
+.cookie-text p {
+  margin: 0;
+  color: #52627a;
+  line-height: 1.6;
+  max-width: 880px;
+}
+
+.cookie-link {
+  display: inline-block;
+  margin-top: 8px;
+  color: #2563eb;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.cookie-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cookie-secondary-btn,
+.cookie-dark-btn,
+.cookie-save-btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cookie-secondary-btn {
+  background: #ffffff;
+  color: #07142f;
+  border: 1px solid #dbe2ea;
+}
+
+.cookie-dark-btn {
+  background: #07142f;
+  color: #ffffff;
+}
+
+.cookie-save-btn {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.cookie-settings {
+  margin-top: 18px;
+  border-top: 1px solid #e5eaf2;
+  padding-top: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.cookie-setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  border: 1px solid #e5eaf2;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.cookie-setting-item strong {
+  color: #07142f;
+}
+
+.cookie-setting-item p {
+  margin: 4px 0 0;
+  color: #52627a;
+  font-size: 14px;
+}
+
+.cookie-setting-item input {
+  width: 20px;
+  height: 20px;
+}
+
+.cookie-required {
+  color: #2563eb;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.cookie-settings-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cookie-settings-footer small {
+  color: #52627a;
+}
+
+@media (max-width: 900px) {
+  .cookie-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cookie-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cookie-secondary-btn,
+  .cookie-dark-btn,
+  .cookie-save-btn {
+    width: 100%;
+  }
+
+  .cookie-banner {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+  }
+}
+
+.public-page {
+  padding: 44px 48px 80px;
+  background: #f8fbff;
+  min-height: calc(100vh - 160px);
+}
+
+.public-page-header {
+  margin-bottom: 34px;
+}
+
+.public-page-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.public-page-title-row h1 {
+  margin: 0 0 10px;
+  color: #07142f;
+  font-size: 44px;
+  line-height: 1.08;
+}
+
+.public-page-title-row p {
+  margin: 0;
+  color: #5b6b84;
+  font-size: 18px;
+}
+
+.category-card-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.all-categories-grid {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+@media (max-width: 800px) {
+  .public-page {
+    padding: 28px 20px 60px;
+  }
+
+  .public-page-title-row {
+    flex-direction: column;
+  }
+
+  .public-page-title-row h1 {
+    font-size: 34px;
+  }
+}

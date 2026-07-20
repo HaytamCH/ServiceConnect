@@ -1,0 +1,621 @@
+.prestataire-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  padding: 40px 56px 60px;
+}
+
+.prestataire-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.prestataire-header h1 {
+  margin: 0 0 8px;
+  color: #0f172a;
+  font-size: 40px;
+}
+
+.prestataire-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 17px;
+}
+
+.prestataire-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.prestataire-stat-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.stat-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.stat-icon.blue {
+  background: #dbeafe;
+}
+
+.stat-icon.orange {
+  background: #ffedd5;
+}
+
+.stat-icon.green {
+  background: #dcfce7;
+}
+
+.stat-icon.purple {
+  background: #ede9fe;
+}
+
+.prestataire-stat-card strong {
+  display: block;
+  color: #0f172a;
+  font-size: 30px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.prestataire-stat-card p {
+  margin: 0;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.prestataire-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.prestataire-action-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 24px;
+  min-height: 180px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+  transition: 0.2s ease;
+}
+
+.prestataire-action-card:hover {
+  border-color: #2563eb;
+  transform: translateY(-2px);
+}
+
+.prestataire-action-card span {
+  font-size: 34px;
+  display: block;
+  margin-bottom: 18px;
+}
+
+.prestataire-action-card h2 {
+  margin: 0 0 10px;
+  color: #0f172a;
+  font-size: 22px;
+}
+
+.prestataire-action-card p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+@media (max-width: 1100px) {
+  .prestataire-stats-grid,
+  .prestataire-actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .prestataire-page {
+    padding: 28px;
+  }
+
+  .prestataire-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .prestataire-stats-grid,
+  .prestataire-actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* =========================
+   PRESTATAIRE - LISTES
+========================= */
+
+.prestataire-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.prestataire-list-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 22px;
+  display: grid;
+  grid-template-columns: 72px 1fr 180px;
+  gap: 20px;
+  align-items: center;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.prestataire-list-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  background: #dbeafe;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+}
+
+.prestataire-list-content {
+  min-width: 0;
+}
+
+.prestataire-list-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.prestataire-list-content h2 {
+  margin: 0 0 8px;
+  color: #0f172a;
+  font-size: 24px;
+}
+
+.prestataire-list-content p {
+  margin: 0 0 12px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.prestataire-list-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: #475569;
+  font-weight: 700;
+}
+
+.prestataire-list-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.status-badge.brouillon {
+  background: #e5e7eb;
+  color: #475569;
+}
+
+.status-badge.en_attente {
+  background: #ffedd5;
+  color: #f97316;
+}
+
+.status-badge.publiee {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.status-badge.suspendue {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.status-badge.supprimee {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+@media (max-width: 900px) {
+  .prestataire-list-card {
+    grid-template-columns: 1fr;
+  }
+
+  .prestataire-list-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+/* =========================
+   PRESTATAIRE - FORMULAIRES
+========================= */
+
+.prestataire-form-card {
+  max-width: 860px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.prestataire-form-card .form-group {
+  margin-bottom: 20px;
+}
+
+.prestataire-form-card label {
+  display: block;
+  margin-bottom: 8px;
+  color: #334155;
+  font-weight: 800;
+}
+
+.prestataire-form-card input,
+.prestataire-form-card select,
+.prestataire-form-card textarea {
+  width: 100%;
+  border: 1px solid #dbe2ea;
+  border-radius: 12px;
+  padding: 13px 14px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 15px;
+  outline: none;
+  font-family: inherit;
+}
+
+.prestataire-form-card input,
+.prestataire-form-card select {
+  height: 48px;
+}
+
+.prestataire-form-card textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.prestataire-form-card input:focus,
+.prestataire-form-card select:focus,
+.prestataire-form-card textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.form-actions .primary-small-btn,
+.form-actions .secondary-small-btn {
+  min-width: 160px;
+}
+
+.form-actions button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 760px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+}
+/* =========================
+   PRESTATAIRE - DISPONIBILITES
+========================= */
+
+.prestataire-two-columns {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.prestataire-panel-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.prestataire-panel-card h2,
+.prestataire-form-card h2 {
+  margin: 0 0 22px;
+  color: #0f172a;
+  font-size: 24px;
+}
+
+.availability-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.availability-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 18px;
+  background: #ffffff;
+  display: grid;
+  grid-template-columns: 1fr 150px;
+  gap: 18px;
+  align-items: center;
+}
+
+.availability-item h3 {
+  margin: 12px 0 10px;
+  color: #0f172a;
+  font-size: 20px;
+}
+
+.availability-item p {
+  margin: 6px 0;
+  color: #64748b;
+}
+
+.availability-item strong {
+  color: #334155;
+}
+
+@media (max-width: 1000px) {
+  .prestataire-two-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .availability-item {
+    grid-template-columns: 1fr;
+  }
+}
+/* =========================
+   PRESTATAIRE - RESERVATIONS
+========================= */
+
+.reservation-provider-card {
+  align-items: flex-start;
+}
+
+.prestataire-list-actions button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.status-badge.acceptee {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.status-badge.refusee,
+.status-badge.annulee {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.status-badge.alternative_proposee {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.status-badge.terminee {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+/* =========================
+   PRESTATAIRE - AVIS
+========================= */
+
+.review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.review-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 22px;
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 20px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.review-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: 900;
+}
+
+.review-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 12px;
+}
+
+.review-top h2 {
+  margin: 0 0 4px;
+  color: #0f172a;
+  font-size: 22px;
+}
+
+.review-date {
+  color: #64748b;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.review-stars {
+  color: #f59e0b;
+  font-size: 20px;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.review-stars strong {
+  color: #0f172a;
+  font-size: 15px;
+  margin-left: 8px;
+}
+
+.review-comment {
+  color: #475569;
+  line-height: 1.5;
+  margin: 0 0 14px;
+}
+
+@media (max-width: 760px) {
+  .review-card {
+    grid-template-columns: 1fr;
+  }
+
+  .review-top {
+    flex-direction: column;
+  }
+}
+/* =========================
+   PRESTATAIRE - PAIEMENTS
+========================= */
+
+.prestataire-payment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.prestataire-payment-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 22px;
+  display: grid;
+  grid-template-columns: 72px 1fr 220px;
+  gap: 20px;
+  align-items: center;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.payment-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  background: #dcfce7;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+}
+
+.payment-content h2 {
+  margin: 10px 0 8px;
+  color: #0f172a;
+  font-size: 23px;
+}
+
+.payment-content p {
+  margin: 6px 0;
+  color: #64748b;
+}
+
+.payment-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.payment-method {
+  display: inline-flex;
+  background: #dbeafe;
+  color: #2563eb;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.payment-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.payment-amount {
+  color: #0f172a;
+  font-size: 28px;
+  text-align: right;
+}
+
+.status-badge.accepte {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.status-badge.refuse {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.status-badge.rembourse {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+@media (max-width: 900px) {
+  .prestataire-payment-card {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-amount {
+    text-align: left;
+  }
+}

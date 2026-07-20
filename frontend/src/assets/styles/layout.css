@@ -1,0 +1,132 @@
+.app-header {
+  height: 84px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 56px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #2563eb;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.logo-mark {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+}
+
+.logo-svg {
+  width: 48px;
+  height: 48px;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 34px;
+  font-weight: 700;
+}
+
+.nav a {
+  color: #0f172a;
+  padding: 30px 0;
+}
+
+.nav a.router-link-active {
+  color: #2563eb;
+  border-bottom: 3px solid #2563eb;
+}
+
+.main-content {
+  min-height: calc(100vh - 160px);
+}
+
+.app-footer {
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  padding: 24px 56px;
+  display: flex;
+  justify-content: space-between;
+  color: #64748b;
+}
+
+.footer-links {
+  display: flex;
+  gap: 22px;
+}
+
+@media (max-width: 760px) {
+  .app-header {
+    height: auto;
+    min-height: 84px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 18px 20px;
+  }
+
+  .nav {
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 14px;
+  }
+
+  .nav a {
+    padding: 8px 0;
+  }
+
+  .nav a.router-link-active {
+    border-bottom: none;
+  }
+
+  .app-footer {
+    flex-direction: column;
+    gap: 14px;
+    padding: 22px;
+  }
+
+  .footer-links {
+    flex-wrap: wrap;
+  }
+  .login-btn,
+  .logout-btn {
+    min-height: 48px;
+    border: 1px solid #2563eb;
+    color: #2563eb !important;
+    background: #ffffff;
+    padding: 0 18px !important;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  .login-btn.router-link-active {
+    border-bottom: 1px solid #2563eb !important;
+  }
+
+  .logout-btn:hover,
+  .login-btn:hover {
+    background: #eff6ff;
+  }
+
+
+}

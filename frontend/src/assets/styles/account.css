@@ -1,0 +1,32 @@
+.account-page {
+  min-height: 75vh;
+  background: #f8fafc;
+  padding: 56px;
+}
+
+.account-card {
+  max-width: 760px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 22px;
+  padding: 34px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+}
+
+.account-card h1 {
+  margin: 0 0 18px;
+  font-size: 36px;
+  color: #0f172a;
+}
+
+.account-card p {
+  font-size: 18px;
+  color: #475569;
+}
+
+.account-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}

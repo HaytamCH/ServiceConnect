@@ -1,0 +1,259 @@
+.provider-page {
+  background: #f8fafc;
+  padding: 34px 56px 60px;
+  min-height: 100vh;
+}
+
+.provider-profile-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.provider-hero-card,
+.provider-services-card,
+.provider-side-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.provider-hero-card {
+  padding: 30px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  align-items: center;
+}
+
+.provider-main-info {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.provider-avatar-xl {
+  width: 130px;
+  height: 130px;
+  border-radius: 26px;
+  background: #dbeafe;
+  color: #2563eb;
+  font-size: 56px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.provider-main-info h1 {
+  margin: 0 0 8px;
+  font-size: 42px;
+  color: #0f172a;
+}
+
+.provider-role {
+  margin: 0 0 16px;
+  color: #2563eb;
+  font-weight: 800;
+}
+
+.provider-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #475569;
+  font-weight: 700;
+}
+
+.provider-description {
+  color: #475569;
+  line-height: 1.7;
+  font-size: 16px;
+}
+
+.provider-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 330px;
+  gap: 24px;
+}
+
+.provider-services-card {
+  padding: 26px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.section-heading span {
+  color: #64748b;
+  font-weight: 700;
+}
+
+.provider-services-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.provider-service-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  background: #ffffff;
+  transition: 0.2s ease;
+}
+
+.provider-service-item:hover {
+  border-color: #2563eb;
+  transform: translateY(-2px);
+}
+
+.service-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: #dbeafe;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.provider-service-item h3 {
+  margin: 0 0 6px;
+  color: #0f172a;
+  font-size: 17px;
+}
+
+.provider-service-item p {
+  margin: 0 0 10px;
+  color: #64748b;
+}
+
+.provider-service-item strong {
+  color: #2563eb;
+  font-size: 17px;
+}
+
+.provider-side-card {
+  padding: 26px;
+  align-self: start;
+}
+
+.provider-side-card h2 {
+  margin: 0 0 18px;
+  font-size: 22px;
+}
+
+.provider-side-card ul {
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 0;
+}
+
+.provider-side-card li {
+  margin-bottom: 14px;
+  color: #475569;
+  font-weight: 700;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 1000px) {
+  .provider-hero-card,
+  .provider-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .provider-services-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .provider-page {
+    padding: 28px;
+  }
+
+  .provider-main-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .provider-main-info h1 {
+    font-size: 32px;
+  }
+}
+
+.provider-side-card .primary-action.full-width,
+.provider-side-card .secondary-action.full-width {
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  box-sizing: border-box;
+}
+
+.provider-side-card .primary-action.full-width {
+  background: #2563eb;
+  color: #ffffff;
+  border: 1px solid #2563eb;
+}
+
+.provider-side-card .secondary-action.full-width {
+  background: #ffffff;
+  color: #2563eb;
+  border: 1px solid #2563eb;
+}
+
+.provider-side-card .primary-action.full-width:hover {
+  background: #1d4ed8;
+}
+
+.provider-side-card .secondary-action.full-width:hover {
+  background: #eef4ff;
+}
+
+.provider-side-card button.secondary-action.full-width {
+  cursor: pointer;
+}
+
+.provider-side-card .success-message,
+.provider-side-card .error-message {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.provider-side-card ul {
+  margin-bottom: 20px;
+}
+
+.provider-side-card .primary-action.full-width + .secondary-action.full-width,
+.provider-side-card .secondary-action.full-width + .secondary-action.full-width,
+.provider-side-card .secondary-action.full-width + .muted-text {
+  margin-top: 10px;
+}

@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Disponibilite extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'annonce_id',
+        'date_debut',
+        'date_fin',
+        'disponible',
+    ];
+
+    protected $casts = [
+        'date_debut' => 'datetime',
+        'date_fin' => 'datetime',
+        'disponible' => 'boolean',
+    ];
+
+    public function annonce()
+    {
+        return $this->belongsTo(Annonce::class, 'annonce_id');
+    }
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'disponibilite_id');
+    }
+}
