@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Paiement;
 use App\Models\Reservation;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Stripe\StripeClient;
@@ -281,6 +282,40 @@ class PaiementController extends Controller
                         'statut' => 'accepte',
                         'transaction_externe_id' => $session->payment_intent ?? $session->id,
                     ]);
+
+                    $paiement->load('reservation');
+
+                    UserNotification::firstOrCreate(
+                        [
+                            'user_id' => $paiement->membre_id,
+                            'type' => 'paiement_accepte',
+                            'related_type' => 'paiement',
+                            'related_id' => $paiement->id,
+                        ],
+                        [
+                            'titre' => 'Paiement confirmé',
+                            'message' => 'Votre paiement a été confirmé avec succès.',
+                            'lien' => '/mes-paiements',
+                            'lu' => false,
+                        ]
+                    );
+
+                    if ($paiement->reservation) {
+                        UserNotification::firstOrCreate(
+                            [
+                                'user_id' => $paiement->reservation->prestataire_id,
+                                'type' => 'paiement_recu',
+                                'related_type' => 'paiement',
+                                'related_id' => $paiement->id,
+                            ],
+                            [
+                                'titre' => 'Paiement reçu',
+                                'message' => 'Un paiement a été confirmé pour une réservation.',
+                                'lien' => '/prestataire/paiements',
+                                'lu' => false,
+                            ]
+                        );
+                    }
                 }
             }
         }
@@ -297,6 +332,21 @@ class PaiementController extends Controller
                     $paiement->update([
                         'statut' => 'refuse',
                     ]);
+
+                    UserNotification::firstOrCreate(
+                        [
+                            'user_id' => $paiement->membre_id,
+                            'type' => 'paiement_refuse',
+                            'related_type' => 'paiement',
+                            'related_id' => $paiement->id,
+                        ],
+                        [
+                            'titre' => 'Paiement non finalisé',
+                            'message' => 'Votre paiement n’a pas été finalisé.',
+                            'lien' => '/mes-paiements',
+                            'lu' => false,
+                        ]
+                    );
                 }
             }
         }

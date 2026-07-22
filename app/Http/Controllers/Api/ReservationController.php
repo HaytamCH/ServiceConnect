@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Annonce;
 use App\Models\Disponibilite;
 use App\Models\Reservation;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 
 class ReservationController extends Controller
@@ -77,6 +78,17 @@ class ReservationController extends Controller
             'date_service' => $disponibilite->date_debut,
             'message_demande' => $validated['message_demande'] ?? null,
             'statut' => 'en_attente',
+        ]);
+
+        UserNotification::create([
+            'user_id' => $annonce->prestataire_id,
+            'type' => 'reservation_recue',
+            'titre' => 'Nouvelle réservation',
+            'message' => $user->prenom . ' ' . $user->nom . ' a envoyé une demande de réservation.',
+            'lien' => '/prestataire/reservations',
+            'related_type' => 'reservation',
+            'related_id' => $reservation->id,
+            'lu' => false,
         ]);
 
         $disponibilite->disponible = false;
@@ -220,6 +232,45 @@ class ReservationController extends Controller
         $reservation->update([
             'statut' => $nouveauStatut,
         ]);
+
+        $notificationData = [
+            'acceptee' => [
+                'type' => 'reservation_acceptee',
+                'titre' => 'Réservation acceptée',
+                'message' => 'Votre demande de réservation a été acceptée.',
+            ],
+            'refusee' => [
+                'type' => 'reservation_refusee',
+                'titre' => 'Réservation refusée',
+                'message' => 'Votre demande de réservation a été refusée.',
+            ],
+            'alternative_proposee' => [
+                'type' => 'reservation_alternative',
+                'titre' => 'Alternative proposée',
+                'message' => 'Une alternative a été proposée pour votre réservation.',
+            ],
+            'terminee' => [
+                'type' => 'reservation_terminee',
+                'titre' => 'Réservation terminée',
+                'message' => 'Votre réservation a été marquée comme terminée.',
+            ],
+        ];
+
+        if (isset($notificationData[$nouveauStatut])) {
+            $data = $notificationData[$nouveauStatut];
+
+            UserNotification::create([
+                'user_id' => $reservation->membre_id,
+                'type' => $data['type'],
+                'titre' => $data['titre'],
+                'message' => $data['message'],
+                'lien' => '/mes-reservations',
+                'related_type' => 'reservation',
+                'related_id' => $reservation->id,
+                'lu' => false,
+            ]);
+        }
+
 
         if ($nouveauStatut === 'refusee' && $reservation->disponibilite_id) {
             $disponibilite = Disponibilite::find($reservation->disponibilite_id);

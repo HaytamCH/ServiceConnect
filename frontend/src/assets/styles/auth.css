@@ -1,10 +1,10 @@
 .auth-page {
-  min-height: 78vh;
+  min-height: calc(100vh - 84px - 74px);
   background: #f8fafc;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 56px;
+  padding: 32px 56px;
 }
 
 .auth-card {

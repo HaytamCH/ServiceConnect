@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Message;
 use App\Models\Reservation;
 use App\Models\User;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 
 class MessageController extends Controller
@@ -92,6 +93,17 @@ class MessageController extends Controller
             'lu' => false,
         ]);
 
+        UserNotification::create([
+            'user_id' => $validated['destinataire_id'],
+            'type' => 'message',
+            'titre' => 'Nouveau message',
+            'message' => $user->prenom . ' ' . $user->nom . ' vous a envoyé un message.',
+            'lien' => '/mes-messages',
+            'related_type' => 'message',
+            'related_id' => $message->id,
+            'lu' => false,
+        ]);
+
         $message->load([
             'expediteur:id,nom,prenom,role',
             'destinataire:id,nom,prenom,role',
@@ -102,5 +114,20 @@ class MessageController extends Controller
             'message' => 'Message envoyé avec succès.',
             'data' => $message
         ], 201);
+    }
+
+    public function markAsRead(Request $request)
+    {
+        $user = $request->user();
+
+        Message::where('destinataire_id', $user->id)
+            ->where('lu', false)
+            ->update([
+                'lu' => true,
+            ]);
+
+        return response()->json([
+            'message' => 'Messages marqués comme lus.'
+        ]);
     }
 }

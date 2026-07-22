@@ -30,3 +30,49 @@
   flex-wrap: wrap;
   margin-top: 28px;
 }
+.account-notifications {
+  margin: 24px 0;
+  padding: 20px;
+  border: 1px solid #dbe5f2;
+  border-radius: 18px;
+  background: #f8fbff;
+}
+
+.account-notifications h2 {
+  margin: 0 0 14px;
+  color: #07142f;
+  font-size: 24px;
+}
+
+.notification-list {
+  display: grid;
+  gap: 12px;
+}
+
+.notification-item {
+  display: grid;
+  grid-template-columns: 36px 40px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #dbe5f2;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #07142f;
+  text-decoration: none;
+}
+
+.notification-item span {
+  font-size: 22px;
+}
+
+.notification-item strong {
+  color: #2563eb;
+  font-size: 22px;
+}
+
+.notification-item p {
+  margin: 0;
+  color: #4b5f7a;
+  font-weight: 700;
+}

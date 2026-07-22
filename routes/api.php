@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\DisponibiliteController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\PaiementController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -88,6 +89,17 @@ Route::prefix('v1')->group(function () {
 
         Route::get('/messages', [MessageController::class, 'index']);
         Route::post('/messages', [MessageController::class, 'store']);
+        Route::patch('/messages/mark-as-read', [MessageController::class, 'markAsRead']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Notifications
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::get('/notifications/summary', [NotificationController::class, 'summary']);
+        Route::patch('/notifications/mark-as-read', [NotificationController::class, 'markAsRead']);
 
         /*
         |--------------------------------------------------------------------------

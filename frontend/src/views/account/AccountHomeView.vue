@@ -1,16 +1,24 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useLanguageStore } from '../../stores/language'
+import { useNotificationStore } from '../../stores/notifications'
 
 const auth = useAuthStore()
 const language = useLanguageStore()
+const notifications = useNotificationStore()
 
 const user = computed(() => auth.user)
 
 const isMembre = computed(() => auth.isMembre)
 const isPrestataire = computed(() => auth.isPrestataire)
 const isAdmin = computed(() => auth.isAdmin)
+
+const hasNotifications = computed(() => notifications.total > 0)
+
+onMounted(async () => {
+  await notifications.loadSummary()
+})
 
 function getRoleLabel(role) {
   if (role === 'membre') {
@@ -43,6 +51,70 @@ function getRoleLabel(role) {
         {{ language.t('account.role') }} :
         <strong>{{ getRoleLabel(user?.role) }}</strong>
       </p>
+
+      <div class="account-notifications">
+        <h2>Notifications</h2>
+
+        <p v-if="notifications.loading" class="muted-text">
+          Chargement des notifications...
+        </p>
+
+        <div v-else-if="hasNotifications" class="notification-list">
+          <RouterLink
+            v-if="notifications.messagesNonLus > 0"
+            to="/mes-messages"
+            class="notification-item"
+          >
+            <span>💬</span>
+            <strong>{{ notifications.messagesNonLus }}</strong>
+            <p>message(s) non lu(s)</p>
+          </RouterLink>
+
+          <RouterLink
+            v-if="notifications.reservationsPrestataireEnAttente > 0"
+            to="/prestataire/reservations"
+            class="notification-item"
+          >
+            <span>📩</span>
+            <strong>{{ notifications.reservationsPrestataireEnAttente }}</strong>
+            <p>demande(s) de réservation en attente</p>
+          </RouterLink>
+
+          <RouterLink
+            v-if="notifications.reservationsAcceptees > 0"
+            to="/mes-reservations"
+            class="notification-item"
+          >
+            <span>✅</span>
+            <strong>{{ notifications.reservationsAcceptees }}</strong>
+            <p>réservation(s) acceptée(s)</p>
+          </RouterLink>
+
+          <RouterLink
+            v-if="notifications.reservationsRefusees > 0"
+            to="/mes-reservations"
+            class="notification-item"
+          >
+            <span>❌</span>
+            <strong>{{ notifications.reservationsRefusees }}</strong>
+            <p>réservation(s) refusée(s)</p>
+          </RouterLink>
+
+          <RouterLink
+            v-if="notifications.reservationsAlternatives > 0"
+            to="/mes-reservations"
+            class="notification-item"
+          >
+            <span>🔁</span>
+            <strong>{{ notifications.reservationsAlternatives }}</strong>
+            <p>alternative(s) proposée(s)</p>
+          </RouterLink>
+        </div>
+
+        <p v-else class="muted-text">
+          Aucune nouvelle notification.
+        </p>
+      </div>
 
       <div class="account-actions">
         <RouterLink to="/annonces" class="primary-small-btn">

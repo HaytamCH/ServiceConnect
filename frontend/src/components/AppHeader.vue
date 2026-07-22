@@ -1,19 +1,37 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useNotificationStore } from '../stores/notifications'
 import LanguageSwitcher from './LanguageSwitcher.vue'
 import { useLanguageStore } from '../stores/language'
 
 const router = useRouter()
 const auth = useAuthStore()
+const notifications = useNotificationStore()
 const language = useLanguageStore()
 
 const isConnected = computed(() => auth.isAuthenticated)
 const user = computed(() => auth.user)
+const notificationTotal = computed(() => notifications.total)
+
+onMounted(async () => {
+  if (isConnected.value) {
+    await notifications.loadSummary()
+  }
+})
+
+watch(isConnected, async (connected) => {
+  if (connected) {
+    await notifications.loadSummary()
+  } else {
+    notifications.clear()
+  }
+})
 
 async function logout() {
   await auth.logout()
+  notifications.clear()
   router.push('/')
 }
 </script>
@@ -60,8 +78,12 @@ async function logout() {
 
       <LanguageSwitcher />
 
-      <RouterLink v-if="isConnected" to="/mon-espace" class="login-btn">
+      <RouterLink v-if="isConnected" to="/mon-espace" class="login-btn account-link-with-badge">
         👤 {{ user?.prenom || language.t('nav.account') }}
+
+        <span v-if="notificationTotal > 0" class="notification-badge">
+       {{ notificationTotal }}
+      </span>
       </RouterLink>
 
       <button v-if="isConnected" type="button" class="logout-btn" @click="logout">

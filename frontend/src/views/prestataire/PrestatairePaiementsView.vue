@@ -3,8 +3,10 @@ import { onMounted, ref } from 'vue'
 import api from '../../api/axios'
 import { useLanguageStore } from '../../stores/language'
 import { annonceUrl } from '../../utils/slug'
+import { useNotificationStore } from '../../stores/notifications'
 
 const language = useLanguageStore()
+const notifications = useNotificationStore()
 
 const paiements = ref([])
 const loading = ref(true)
@@ -12,6 +14,7 @@ const error = ref('')
 
 onMounted(async () => {
   await loadPaiements()
+  await markProviderPaymentNotificationsAsRead()
 })
 
 async function loadPaiements() {
@@ -33,6 +36,15 @@ async function loadPaiements() {
     error.value = language.t('providerPayments.loadError')
   } finally {
     loading.value = false
+  }
+}
+
+async function markProviderPaymentNotificationsAsRead() {
+  try {
+    await api.patch('/notifications/mark-as-read?type=paiement_recu')
+    await notifications.loadSummary()
+  } catch (e) {
+    console.warn('Impossible de marquer les notifications de paiement reçu comme lues.')
   }
 }
 

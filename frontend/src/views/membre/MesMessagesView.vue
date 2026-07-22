@@ -4,10 +4,12 @@ import { useRoute } from 'vue-router'
 import api from '../../api/axios'
 import { useAuthStore } from '../../stores/auth'
 import { useLanguageStore } from '../../stores/language'
+import { useNotificationStore } from '../../stores/notifications'
 
 const route = useRoute()
 const auth = useAuthStore()
 const language = useLanguageStore()
+const notifications = useNotificationStore()
 
 const messages = ref([])
 const loading = ref(true)
@@ -32,6 +34,7 @@ const form = ref({
 
 onMounted(async () => {
   await loadMessages()
+  await markMessagesAsRead()
 })
 
 async function loadMessages() {
@@ -45,6 +48,16 @@ async function loadMessages() {
     error.value = language.t('messages.loadError')
   } finally {
     loading.value = false
+  }
+}
+
+async function markMessagesAsRead() {
+  try {
+    await api.patch('/messages/mark-as-read')
+    await api.patch('/notifications/mark-as-read?type=message')
+    await notifications.loadSummary()
+  } catch (e) {
+    console.warn('Impossible de marquer les messages comme lus.')
   }
 }
 

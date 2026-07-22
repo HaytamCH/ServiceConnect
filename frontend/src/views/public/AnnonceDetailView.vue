@@ -285,9 +285,7 @@ function getCategoryName(categorie) {
   return language.t(`home.categoryNames.${key}`)
 }
 
-  const key = getCategoryKey(categorie.nom)
-  return language.t(`home.categoryNames.${key}`)
-}
+
 
 function formatDate(date) {
   if (!date) {

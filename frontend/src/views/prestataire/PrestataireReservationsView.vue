@@ -3,9 +3,11 @@ import { onMounted, ref } from 'vue'
 import api from '../../api/axios'
 import { useLanguageStore } from '../../stores/language'
 import { annonceUrl } from '../../utils/slug'
+import { useNotificationStore } from '../../stores/notifications'
 
 
 const language = useLanguageStore()
+const notifications = useNotificationStore()
 
 const reservations = ref([])
 const loading = ref(true)
@@ -15,8 +17,8 @@ const success = ref('')
 
 onMounted(async () => {
   await loadReservations()
+  await markProviderReservationNotificationsAsRead()
 })
-
 async function loadReservations() {
   loading.value = true
   error.value = ''
@@ -36,6 +38,15 @@ async function loadReservations() {
     error.value = language.t('providerReservations.loadError')
   } finally {
     loading.value = false
+  }
+}
+
+async function markProviderReservationNotificationsAsRead() {
+  try {
+    await api.patch('/notifications/mark-as-read?type=reservation_recue')
+    await notifications.loadSummary()
+  } catch (e) {
+    console.warn('Impossible de marquer les notifications de réservation reçue comme lues.')
   }
 }
 
