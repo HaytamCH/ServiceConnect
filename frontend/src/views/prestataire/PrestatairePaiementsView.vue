@@ -47,6 +47,7 @@ function calculateStripeFee(paiement) {
 
   return Number(paiement.montant || 0) * STRIPE_RATE + STRIPE_FIXED_FEE
 }
+
 function formatCurrency(value) {
   const locale =
     language.current === 'en'
@@ -208,14 +209,7 @@ function getAnnonceTitle(paiement) {
           <p>Commission ServiceConnect estimée</p>
         </div>
       </article>
-
-      <article class="payment-summary-card">
-        <span>💳</span>
-        <div>
-          <h2>{{ formatCurrency(totalFraisStripe) }}</h2>
-          <p>Frais Stripe estimés</p>
-        </div>
-      </article>
+      
 
       <article class="payment-summary-card">
         <span>✅</span>
