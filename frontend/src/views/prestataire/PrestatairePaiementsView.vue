@@ -28,18 +28,12 @@ const totalBrutRecu = computed(() => {
 
 const totalCommissionServiceConnect = computed(() => {
   return paiementsAcceptes.value.reduce((total, paiement) => {
-    return total + calculateServiceCommission(paiement)
-  }, 0)
-})
-
-const totalFraisStripe = computed(() => {
-  return paiementsAcceptes.value.reduce((total, paiement) => {
-    return total + calculateStripeFee(paiement)
+    return total + calculateServiceCommission(paiement) + calculateStripeFee(paiement)
   }, 0)
 })
 
 const totalNetPrestataire = computed(() => {
-  return totalBrutRecu.value - totalCommissionServiceConnect.value - totalFraisStripe.value
+  return totalBrutRecu.value - totalCommissionServiceConnect.value
 })
 
 function calculateServiceCommission(paiement) {
@@ -53,7 +47,6 @@ function calculateStripeFee(paiement) {
 
   return Number(paiement.montant || 0) * STRIPE_RATE + STRIPE_FIXED_FEE
 }
-
 function formatCurrency(value) {
   const locale =
     language.current === 'en'
