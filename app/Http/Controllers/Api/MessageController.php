@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Annonce;
 use App\Models\Message;
 use App\Models\Reservation;
 use App\Models\User;
@@ -11,6 +12,26 @@ use Illuminate\Http\Request;
 
 class MessageController extends Controller
 {
+    private function notifierAdmins($type, $titre, $message, $lien, $relatedType, $relatedId)
+    {
+        $admins = User::where('role', 'administrateur')
+            ->where('statut', 'actif')
+            ->get();
+
+        foreach ($admins as $admin) {
+            UserNotification::create([
+                'user_id' => $admin->id,
+                'type' => $type,
+                'titre' => $titre,
+                'message' => $message,
+                'lien' => $lien,
+                'related_type' => $relatedType,
+                'related_id' => $relatedId,
+                'lu' => false,
+            ]);
+        }
+    }
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -18,7 +39,9 @@ class MessageController extends Controller
         $messages = Message::with([
             'expediteur:id,nom,prenom,role',
             'destinataire:id,nom,prenom,role',
-            'reservation:id,annonce_id,statut'
+            'annonce:id,titre,statut',
+            'reservation:id,annonce_id,statut',
+            'reservation.annonce:id,titre,statut',
         ])
             ->where(function ($query) use ($user) {
                 $query->where('expediteur_id', $user->id)
@@ -43,10 +66,11 @@ class MessageController extends Controller
         $validated = $request->validate([
             'destinataire_id' => 'required|exists:users,id',
             'reservation_id' => 'nullable|exists:reservations,id',
+            'annonce_id' => 'nullable|exists:annonces,id',
             'contenu' => 'required|string|max:2000',
         ]);
 
-        if ($validated['destinataire_id'] == $user->id) {
+        if ((int) $validated['destinataire_id'] === (int) $user->id) {
             return response()->json([
                 'message' => 'Vous ne pouvez pas vous envoyer un message à vous-même.'
             ], 422);
@@ -62,12 +86,14 @@ class MessageController extends Controller
             ], 404);
         }
 
+        $reservation = null;
+
         if (!empty($validated['reservation_id'])) {
             $reservation = Reservation::find($validated['reservation_id']);
 
             if (
-                $reservation->membre_id !== $user->id &&
-                $reservation->prestataire_id !== $user->id &&
+                (int) $reservation->membre_id !== (int) $user->id &&
+                (int) $reservation->prestataire_id !== (int) $user->id &&
                 $user->role !== 'administrateur'
             ) {
                 return response()->json([
@@ -76,11 +102,31 @@ class MessageController extends Controller
             }
 
             if (
-                $validated['destinataire_id'] !== $reservation->membre_id &&
-                $validated['destinataire_id'] !== $reservation->prestataire_id
+                (int) $validated['destinataire_id'] !== (int) $reservation->membre_id &&
+                (int) $validated['destinataire_id'] !== (int) $reservation->prestataire_id
             ) {
                 return response()->json([
                     'message' => 'Le destinataire ne fait pas partie de cette réservation.'
+                ], 422);
+            }
+        }
+
+        $annonceId = $validated['annonce_id'] ?? ($reservation?->annonce_id ?? null);
+
+        if ($annonceId) {
+            $annonce = Annonce::where('id', $annonceId)
+                ->where('statut', 'publiee')
+                ->first();
+
+            if (!$annonce) {
+                return response()->json([
+                    'message' => 'Cette annonce n’est plus disponible.'
+                ], 422);
+            }
+
+            if ((int) $annonce->prestataire_id !== (int) $validated['destinataire_id']) {
+                return response()->json([
+                    'message' => 'Le destinataire ne correspond pas au prestataire de cette annonce.'
                 ], 422);
             }
         }
@@ -89,6 +135,7 @@ class MessageController extends Controller
             'expediteur_id' => $user->id,
             'destinataire_id' => $validated['destinataire_id'],
             'reservation_id' => $validated['reservation_id'] ?? null,
+            'annonce_id' => $annonceId,
             'contenu' => $validated['contenu'],
             'lu' => false,
         ]);
@@ -104,10 +151,23 @@ class MessageController extends Controller
             'lu' => false,
         ]);
 
+        if ($user->role !== 'administrateur' && $destinataire->role !== 'administrateur') {
+            $this->notifierAdmins(
+                'admin_message_echange',
+                'Nouveau message échangé',
+                'Un nouveau message a été échangé entre deux utilisateurs.',
+                '/admin/messages',
+                'message',
+                $message->id
+            );
+        }
+
         $message->load([
             'expediteur:id,nom,prenom,role',
             'destinataire:id,nom,prenom,role',
-            'reservation:id,annonce_id,statut'
+            'annonce:id,titre,statut',
+            'reservation:id,annonce_id,statut',
+            'reservation.annonce:id,titre,statut',
         ]);
 
         return response()->json([

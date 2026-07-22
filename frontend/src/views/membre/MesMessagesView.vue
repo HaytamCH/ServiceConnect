@@ -5,6 +5,7 @@ import api from '../../api/axios'
 import { useAuthStore } from '../../stores/auth'
 import { useLanguageStore } from '../../stores/language'
 import { useNotificationStore } from '../../stores/notifications'
+import { annonceUrl } from '../../utils/slug'
 
 const route = useRoute()
 const auth = useAuthStore()
@@ -20,15 +21,12 @@ const isPrestataire = computed(() => auth.isPrestataire)
 const isMembre = computed(() => auth.isMembre)
 
 const showMessageForm = computed(() => {
-  if (!isPrestataire.value) {
-    return true
-  }
-
   return !!route.query.destinataire_id
 })
 
 const form = ref({
   destinataire_id: route.query.destinataire_id || '',
+  annonce_id: route.query.annonce_id || '',
   contenu: '',
 })
 
@@ -71,10 +69,16 @@ async function sendMessage() {
   }
 
   try {
-    await api.post('/messages', {
+    const payload = {
       destinataire_id: form.value.destinataire_id,
       contenu: form.value.contenu.trim(),
-    })
+    }
+
+    if (form.value.annonce_id) {
+      payload.annonce_id = form.value.annonce_id
+    }
+
+    await api.post('/messages', payload)
 
     success.value = language.t('messages.sentSuccess')
     form.value.contenu = ''
@@ -106,6 +110,30 @@ function getPersonName(person) {
   }
 
   return `${person.prenom || ''} ${person.nom || ''}`.trim()
+}
+
+function getLinkedAnnonce(message) {
+  if (message.annonce) {
+    return message.annonce
+  }
+
+  if (message.reservation?.annonce) {
+    return message.reservation.annonce
+  }
+
+  return null
+}
+
+function canOpenAnnonce(message) {
+  const annonce = getLinkedAnnonce(message)
+
+  return annonce && annonce.statut === 'publiee'
+}
+
+function getAnnonceTitle(message) {
+  const annonce = getLinkedAnnonce(message)
+
+  return annonce?.titre || language.t('messages.reservedService')
 }
 </script>
 
@@ -170,9 +198,16 @@ function getPersonName(person) {
 
               <p>{{ message.contenu }}</p>
 
-              <small v-if="message.reservation">
-                {{ language.t('messages.linkedReservation') }} :
-                {{ message.reservation.annonce?.titre || language.t('messages.reservedService') }}
+              <RouterLink
+                v-if="canOpenAnnonce(message)"
+                :to="annonceUrl(getLinkedAnnonce(message))"
+                class="admin-inline-link"
+              >
+                Voir l’annonce : {{ getAnnonceTitle(message) }}
+              </RouterLink>
+
+              <small v-else-if="getLinkedAnnonce(message)">
+                Annonce liée : {{ getAnnonceTitle(message) }} — indisponible actuellement
               </small>
             </div>
           </article>
@@ -187,7 +222,7 @@ function getPersonName(person) {
       <aside v-if="showMessageForm" class="message-form-card">
         <h2>{{ language.t('messages.newMessage') }}</h2>
 
-        <div v-if="route.query.destinataire_id" class="recipient-box">
+        <div class="recipient-box">
           <span>{{ language.t('messages.messageTo') }}</span>
 
           <strong>
@@ -197,11 +232,6 @@ function getPersonName(person) {
           <small v-if="route.query.annonce_titre">
             {{ language.t('messages.about') }} : {{ route.query.annonce_titre }}
           </small>
-        </div>
-
-        <div v-else class="recipient-box warning">
-          <span>{{ language.t('messages.noProviderSelected') }}</span>
-          <strong>{{ language.t('messages.chooseProvider') }}</strong>
         </div>
 
         <div class="form-group">

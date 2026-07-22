@@ -5,10 +5,31 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Avis;
 use App\Models\Reservation;
+use App\Models\User;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 
 class AvisController extends Controller
 {
+    private function notifierAdmins($type, $titre, $message, $lien, $relatedType, $relatedId)
+    {
+        $admins = User::where('role', 'administrateur')
+            ->where('statut', 'actif')
+            ->get();
+
+        foreach ($admins as $admin) {
+            UserNotification::create([
+                'user_id' => $admin->id,
+                'type' => $type,
+                'titre' => $titre,
+                'message' => $message,
+                'lien' => $lien,
+                'related_type' => $relatedType,
+                'related_id' => $relatedId,
+                'lu' => false,
+            ]);
+        }
+    }
     private function peutLaisserAvis($user)
     {
         return in_array($user->role, ['membre', 'prestataire']);
@@ -88,6 +109,15 @@ class AvisController extends Controller
             'annonce:id,titre,localisation',
             'reservation:id,statut'
         ]);
+
+        $this->notifierAdmins(
+            'admin_avis_publie',
+            'Nouvel avis publié',
+            'Un nouvel avis a été laissé par ' . $user->prenom . ' ' . $user->nom . '.',
+            '/admin/avis',
+            'avis',
+            $avis->id
+        );
 
         return response()->json([
             'message' => 'Avis ajouté avec succès.',

@@ -403,6 +403,27 @@ export const translations = {
       registerLoading: 'Création...',
       registerError: 'Inscription impossible. Vérifiez les champs.',
       alreadyAccount: 'J’ai déjà un compte',
+
+      emailPlaceholder: 'votre@email.com',
+
+      forgotPasswordTitle: 'Mot de passe oublié',
+      forgotPasswordSubtitle: 'Entrez votre adresse email afin de recevoir un lien de réinitialisation.',
+      forgotPasswordButton: 'Envoyer le lien',
+      forgotPasswordLoading: 'Envoi en cours...',
+      forgotPasswordSuccess: 'Si cette adresse existe dans notre système, un lien de réinitialisation sera envoyé.',
+      forgotPasswordError: 'Impossible de traiter la demande pour le moment.',
+      backToLogin: 'Retour à la connexion',
+
+      resetPasswordTitle: 'Nouveau mot de passe',
+      resetPasswordSubtitle: 'Choisissez un nouveau mot de passe pour votre compte ServiceConnect.',
+      newPassword: 'Nouveau mot de passe',
+      newPasswordPlaceholder: 'Votre nouveau mot de passe',
+      confirmNewPassword: 'Confirmer le mot de passe',
+      confirmNewPasswordPlaceholder: 'Confirmez le mot de passe',
+      resetPasswordButton: 'Réinitialiser le mot de passe',
+      resetPasswordLoading: 'Réinitialisation...',
+      resetPasswordSuccess: 'Mot de passe réinitialisé avec succès.',
+      resetPasswordError: 'Impossible de réinitialiser le mot de passe.',
     },
 
     providerReservations: {
@@ -760,6 +781,27 @@ export const translations = {
       registerLoading: 'Creating...',
       registerError: 'Registration failed. Please check the fields.',
       alreadyAccount: 'I already have an account',
+
+      emailPlaceholder: 'your@email.com',
+
+      forgotPasswordTitle: 'Forgot password',
+      forgotPasswordSubtitle: 'Enter your email address to receive a password reset link.',
+      forgotPasswordButton: 'Send link',
+      forgotPasswordLoading: 'Sending...',
+      forgotPasswordSuccess: 'If this address exists in our system, a reset link will be sent.',
+      forgotPasswordError: 'Unable to process the request at the moment.',
+      backToLogin: 'Back to login',
+
+      resetPasswordTitle: 'New password',
+      resetPasswordSubtitle: 'Choose a new password for your ServiceConnect account.',
+      newPassword: 'New password',
+      newPasswordPlaceholder: 'Your new password',
+      confirmNewPassword: 'Confirm password',
+      confirmNewPasswordPlaceholder: 'Confirm your password',
+      resetPasswordButton: 'Reset password',
+      resetPasswordLoading: 'Resetting...',
+      resetPasswordSuccess: 'Password reset successfully.',
+      resetPasswordError: 'Unable to reset the password.',
     },
 
     announcementForm: {
@@ -1212,6 +1254,27 @@ export const translations = {
       registerLoading: 'Aanmaken...',
       registerError: 'Registratie onmogelijk. Controleer de velden.',
       alreadyAccount: 'Ik heb al een account',
+
+      emailPlaceholder: 'uw@email.com',
+
+      forgotPasswordTitle: 'Wachtwoord vergeten',
+      forgotPasswordSubtitle: 'Voer uw e-mailadres in om een link voor wachtwoordherstel te ontvangen.',
+      forgotPasswordButton: 'Link verzenden',
+      forgotPasswordLoading: 'Bezig met verzenden...',
+      forgotPasswordSuccess: 'Als dit adres in ons systeem bestaat, wordt er een resetlink verzonden.',
+      forgotPasswordError: 'De aanvraag kan momenteel niet worden verwerkt.',
+      backToLogin: 'Terug naar aanmelden',
+
+      resetPasswordTitle: 'Nieuw wachtwoord',
+      resetPasswordSubtitle: 'Kies een nieuw wachtwoord voor uw ServiceConnect-account.',
+      newPassword: 'Nieuw wachtwoord',
+      newPasswordPlaceholder: 'Uw nieuwe wachtwoord',
+      confirmNewPassword: 'Wachtwoord bevestigen',
+      confirmNewPasswordPlaceholder: 'Bevestig uw wachtwoord',
+      resetPasswordButton: 'Wachtwoord opnieuw instellen',
+      resetPasswordLoading: 'Bezig met opnieuw instellen...',
+      resetPasswordSuccess: 'Wachtwoord succesvol opnieuw ingesteld.',
+      resetPasswordError: 'Het wachtwoord kan niet opnieuw worden ingesteld.',
     },
 
 

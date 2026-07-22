@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import api from '../../api/axios'
 import { useLanguageStore } from '../../stores/language'
 import { annonceUrl } from '../../utils/slug'
@@ -8,9 +8,65 @@ import { useNotificationStore } from '../../stores/notifications'
 const language = useLanguageStore()
 const notifications = useNotificationStore()
 
+const SERVICE_COMMISSION_RATE = 0.10
+const STRIPE_RATE = 0.015
+const STRIPE_FIXED_FEE = 0.25
+
 const paiements = ref([])
 const loading = ref(true)
 const error = ref('')
+
+const paiementsAcceptes = computed(() => {
+  return paiements.value.filter((paiement) => paiement.statut === 'accepte')
+})
+
+const totalBrutRecu = computed(() => {
+  return paiementsAcceptes.value.reduce((total, paiement) => {
+    return total + Number(paiement.montant || 0)
+  }, 0)
+})
+
+const totalCommissionServiceConnect = computed(() => {
+  return paiementsAcceptes.value.reduce((total, paiement) => {
+    return total + calculateServiceCommission(paiement)
+  }, 0)
+})
+
+const totalFraisStripe = computed(() => {
+  return paiementsAcceptes.value.reduce((total, paiement) => {
+    return total + calculateStripeFee(paiement)
+  }, 0)
+})
+
+const totalNetPrestataire = computed(() => {
+  return totalBrutRecu.value - totalCommissionServiceConnect.value - totalFraisStripe.value
+})
+
+function calculateServiceCommission(paiement) {
+  return Number(paiement.montant || 0) * SERVICE_COMMISSION_RATE
+}
+
+function calculateStripeFee(paiement) {
+  if (paiement.methode !== 'stripe' || paiement.statut !== 'accepte') {
+    return 0
+  }
+
+  return Number(paiement.montant || 0) * STRIPE_RATE + STRIPE_FIXED_FEE
+}
+
+function formatCurrency(value) {
+  const locale =
+    language.current === 'en'
+      ? 'en-BE'
+      : language.current === 'nl'
+        ? 'nl-BE'
+        : 'fr-BE'
+
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(Number(value || 0))
+}
 
 onMounted(async () => {
   await loadPaiements()
@@ -142,6 +198,40 @@ function getAnnonceTitle(paiement) {
     <p v-if="error" class="error-message">
       {{ error }}
     </p>
+
+    <section v-if="!loading && paiements.length" class="payment-summary-grid">
+      <article class="payment-summary-card">
+        <span>💶</span>
+        <div>
+          <h2>{{ formatCurrency(totalBrutRecu) }}</h2>
+          <p>Total brut reçu</p>
+        </div>
+      </article>
+
+      <article class="payment-summary-card">
+        <span>🏦</span>
+        <div>
+          <h2>{{ formatCurrency(totalCommissionServiceConnect) }}</h2>
+          <p>Commission ServiceConnect estimée</p>
+        </div>
+      </article>
+
+      <article class="payment-summary-card">
+        <span>💳</span>
+        <div>
+          <h2>{{ formatCurrency(totalFraisStripe) }}</h2>
+          <p>Frais Stripe estimés</p>
+        </div>
+      </article>
+
+      <article class="payment-summary-card">
+        <span>✅</span>
+        <div>
+          <h2>{{ formatCurrency(totalNetPrestataire) }}</h2>
+          <p>Net estimé à reverser</p>
+        </div>
+      </article>
+    </section>
 
     <div v-if="!loading && paiements.length" class="prestataire-payment-list">
       <article

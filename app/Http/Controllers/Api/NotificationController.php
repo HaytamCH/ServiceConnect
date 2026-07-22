@@ -39,6 +39,12 @@ class NotificationController extends Controller
                     'refuses' => (clone $nonLues)->where('type', 'paiement_refuse')->count(),
                     'recus' => (clone $nonLues)->where('type', 'paiement_recu')->count(),
                 ],
+
+                'admin' => [
+                    'annonces_en_attente' => (clone $nonLues)->where('type', 'admin_annonce_en_attente')->count(),
+                    'avis_a_moderer' => (clone $nonLues)->where('type', 'admin_avis_publie')->count(),
+                    'messages_a_surveiller' => (clone $nonLues)->where('type', 'admin_message_echange')->count(),
+                ],
             ],
         ]);
     }

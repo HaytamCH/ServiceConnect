@@ -186,6 +186,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/admin/avis', [AdminController::class, 'avis']);
         Route::patch('/admin/avis/{id}/visibilite', [AdminController::class, 'modifierVisibiliteAvis']);
 
+        Route::get('/admin/messages', [AdminController::class, 'messages']);
+
         Route::get('/admin/paiements', [AdminController::class, 'paiements']);
         Route::patch('/admin/paiements/{id}/statut', [AdminController::class, 'modifierStatutPaiement']);
     });

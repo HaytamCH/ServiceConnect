@@ -14,8 +14,25 @@ const isMembre = computed(() => auth.isMembre)
 const isPrestataire = computed(() => auth.isPrestataire)
 const isAdmin = computed(() => auth.isAdmin)
 
-const hasNotifications = computed(() => notifications.total > 0)
+const visibleNotificationsCount = computed(() => {
+  if (isAdmin.value) {
+    return (
+      notifications.adminAnnoncesEnAttente +
+      notifications.adminAvisAModerer +
+      notifications.adminMessagesASurveiller
+    )
+  }
 
+  return (
+    notifications.messagesNonLus +
+    notifications.reservationsPrestataireEnAttente +
+    notifications.reservationsAcceptees +
+    notifications.reservationsRefusees +
+    notifications.reservationsAlternatives
+  )
+})
+
+const hasNotifications = computed(() => visibleNotificationsCount.value > 0)
 onMounted(async () => {
   await notifications.loadSummary()
 })
@@ -109,6 +126,38 @@ function getRoleLabel(role) {
             <strong>{{ notifications.reservationsAlternatives }}</strong>
             <p>alternative(s) proposée(s)</p>
           </RouterLink>
+
+          <template v-if="isAdmin">
+            <RouterLink
+              v-if="notifications.adminAnnoncesEnAttente > 0"
+              to="/admin/annonces"
+              class="notification-item"
+            >
+              <span>📢</span>
+              <strong>{{ notifications.adminAnnoncesEnAttente }}</strong>
+              <p>annonce(s) en attente de validation</p>
+            </RouterLink>
+
+            <RouterLink
+              v-if="notifications.adminAvisAModerer > 0"
+              to="/admin/avis"
+              class="notification-item"
+            >
+              <span>⭐</span>
+              <strong>{{ notifications.adminAvisAModerer }}</strong>
+              <p>avis récent(s) à surveiller</p>
+            </RouterLink>
+
+            <RouterLink
+              v-if="notifications.adminMessagesASurveiller > 0"
+              to="/admin/messages"
+              class="notification-item"
+            >
+              <span>💬</span>
+              <strong>{{ notifications.adminMessagesASurveiller }}</strong>
+              <p>message(s) échangé(s) à surveiller</p>
+            </RouterLink>
+          </template>
         </div>
 
         <p v-else class="muted-text">

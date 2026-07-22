@@ -38,6 +38,28 @@ class AdminController extends Controller
         if($verification){
             return $verification;
         }
+
+        $paiementsAcceptes = Paiement::where('statut', 'accepte')->get();
+
+        $tauxCommissionServiceConnect = 0.10;
+        $tauxStripe = 0.015;
+        $fraisFixeStripe = 0.25;
+
+        $montantBrutPaiementsAcceptes = $paiementsAcceptes->sum('montant');
+
+        $commissionServiceConnect = $paiementsAcceptes->sum(function ($paiement) use ($tauxCommissionServiceConnect) {
+            return (float) $paiement->montant * $tauxCommissionServiceConnect;
+        });
+
+        $fraisStripeEstimes = $paiementsAcceptes->sum(function ($paiement) use ($tauxStripe, $fraisFixeStripe) {
+            if ($paiement->methode !== 'stripe') {
+                return 0;
+            }
+
+            return ((float) $paiement->montant * $tauxStripe) + $fraisFixeStripe;
+        });
+
+        $montantNetPrestataires = $montantBrutPaiementsAcceptes - $commissionServiceConnect - $fraisStripeEstimes;
         return response()->json([
         'data' => [
             'nombre_utilisateurs' => User::count(),
@@ -58,7 +80,14 @@ class AdminController extends Controller
 
             'nombre_paiements' => Paiement::count(),
             'nombre_paiements_acceptes' => Paiement::where('statut', 'accepte')->count(),
-            'montant_total_paiements' => Paiement::where('statut', 'accepte')->sum('montant'),
+            'montant_total_paiements' => round($montantBrutPaiementsAcceptes, 2),
+            'montant_brut_paiements_acceptes' => round($montantBrutPaiementsAcceptes, 2),
+            'commission_serviceconnect' => round($commissionServiceConnect, 2),
+            'frais_stripe_estimes' => round($fraisStripeEstimes, 2),
+            'montant_net_prestataires' => round($montantNetPrestataires, 2),
+            'taux_commission_serviceconnect' => 10,
+            'taux_stripe' => 1.5,
+            'frais_fixe_stripe' => 0.25,
         ]
         ]);
     }
@@ -510,6 +539,67 @@ class AdminController extends Controller
 
     return response()->json($paiements);
 }
+    public function messages(Request $request)
+    {
+        $verification = $this->verifierAdmin($request->user());
+
+        if ($verification) {
+            return $verification;
+        }
+
+        $search = trim($request->query('search', ''));
+
+        $messages = Message::with([
+            'expediteur:id,nom,prenom,email,telephone,role',
+            'destinataire:id,nom,prenom,email,telephone,role',
+            'reservation:id,annonce_id,statut,date_service',
+            'reservation.annonce:id,titre'
+        ])
+            ->when($search !== '', function ($query) use ($search) {
+                $terms = preg_split('/\s+/', strtolower($search), -1, PREG_SPLIT_NO_EMPTY);
+
+                $query->where(function ($q) use ($search, $terms) {
+                    $q->where('contenu', 'like', '%' . $search . '%')
+                        ->orWhere('id', $search)
+                        ->orWhereHas('expediteur', function ($userQuery) use ($search, $terms) {
+                            $userQuery->where('nom', 'like', '%' . $search . '%')
+                                ->orWhere('prenom', 'like', '%' . $search . '%')
+                                ->orWhere('email', 'like', '%' . $search . '%')
+                                ->orWhere('telephone', 'like', '%' . $search . '%')
+                                ->orWhere(function ($nameQuery) use ($terms) {
+                                    foreach ($terms as $term) {
+                                        $nameQuery->where(function ($subQuery) use ($term) {
+                                            $subQuery->where('nom', 'like', '%' . $term . '%')
+                                                ->orWhere('prenom', 'like', '%' . $term . '%');
+                                        });
+                                    }
+                                });
+                        })
+                        ->orWhereHas('destinataire', function ($userQuery) use ($search, $terms) {
+                            $userQuery->where('nom', 'like', '%' . $search . '%')
+                                ->orWhere('prenom', 'like', '%' . $search . '%')
+                                ->orWhere('email', 'like', '%' . $search . '%')
+                                ->orWhere('telephone', 'like', '%' . $search . '%')
+                                ->orWhere(function ($nameQuery) use ($terms) {
+                                    foreach ($terms as $term) {
+                                        $nameQuery->where(function ($subQuery) use ($term) {
+                                            $subQuery->where('nom', 'like', '%' . $term . '%')
+                                                ->orWhere('prenom', 'like', '%' . $term . '%');
+                                        });
+                                    }
+                                });
+                        })
+                        ->orWhereHas('reservation.annonce', function ($annonceQuery) use ($search) {
+                            $annonceQuery->where('titre', 'like', '%' . $search . '%');
+                        });
+                });
+            })
+            ->latest()
+            ->paginate(20)
+            ->appends($request->only('search'));
+
+        return response()->json($messages);
+    }
 
     public function modifierStatutPaiement(Request $request, $id)
     {

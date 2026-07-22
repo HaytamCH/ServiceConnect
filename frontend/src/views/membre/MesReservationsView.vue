@@ -98,6 +98,35 @@ function statutLabel(statut) {
 
   return labels[statut] || statut
 }
+
+function getPaiement(reservation) {
+  return reservation.paiement || null
+}
+
+function isReservationPaid(reservation) {
+  return getPaiement(reservation)?.statut === 'accepte'
+}
+
+function isPaymentPending(reservation) {
+  return getPaiement(reservation)?.statut === 'en_attente'
+}
+
+function paymentLabel(reservation) {
+  const paiement = getPaiement(reservation)
+
+  if (!paiement) {
+    return ''
+  }
+
+  const labels = {
+    en_attente: 'Paiement en attente',
+    accepte: 'Paiement effectué',
+    refuse: 'Paiement refusé',
+    rembourse: 'Paiement remboursé',
+  }
+
+  return labels[paiement.statut] || paiement.statut
+}
 </script>
 
 <template>
@@ -167,8 +196,15 @@ function statutLabel(statut) {
             {{ statutLabel(reservation.statut) }}
           </span>
 
+          <span
+            v-if="isReservationPaid(reservation)"
+            class="status-badge accepte"
+          >
+            {{ paymentLabel(reservation) }}
+          </span>
+
           <button
-            v-if="reservation.statut === 'acceptee'"
+            v-else-if="reservation.statut === 'acceptee'"
             type="button"
             class="primary-small-btn"
             :disabled="payingReservationId === reservation.id"

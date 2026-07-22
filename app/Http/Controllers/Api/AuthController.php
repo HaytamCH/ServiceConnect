@@ -131,7 +131,9 @@ class AuthController extends Controller
         ]);
 
         ResetPasswordNotification::createUrlUsing(function ($notifiable, $token) {
-            return 'http://localhost:5173/reset-password?token=' . $token . '&email=' . urlencode($notifiable->getEmailForPasswordReset());
+            $frontendUrl = rtrim(config('services.stripe.frontend_url', env('FRONTEND_URL', 'http://localhost:5173')), '/');
+
+            return $frontendUrl . '/reset-password?token=' . $token . '&email=' . urlencode($notifiable->getEmailForPasswordReset());
         });
 
         Password::sendResetLink(

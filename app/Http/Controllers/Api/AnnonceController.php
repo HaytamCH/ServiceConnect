@@ -4,10 +4,32 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Annonce;
+use App\Models\User;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 
 class AnnonceController extends Controller
 {
+
+    private function notifierAdmins($type, $titre, $message, $lien, $relatedType, $relatedId)
+    {
+        $admins = User::where('role', 'administrateur')
+            ->where('statut', 'actif')
+            ->get();
+
+        foreach ($admins as $admin) {
+            UserNotification::create([
+                'user_id' => $admin->id,
+                'type' => $type,
+                'titre' => $titre,
+                'message' => $message,
+                'lien' => $lien,
+                'related_type' => $relatedType,
+                'related_id' => $relatedId,
+                'lu' => false,
+            ]);
+        }
+    }
     public function index(Request $request)
     {
         $query = Annonce::with([
@@ -156,6 +178,14 @@ class AnnonceController extends Controller
             'categorie:id,nom',
             'prestataire:id,nom,prenom,localisation'
         ]);
+        $this->notifierAdmins(
+            'admin_annonce_en_attente',
+            'Nouvelle annonce à valider',
+            'Une nouvelle annonce a été créée par ' . $user->prenom . ' ' . $user->nom . '.',
+            '/admin/annonces',
+            'annonce',
+            $annonce->id
+        );
 
         return response()->json([
             'message' => 'Annonce créée avec succès. Elle est en attente de validation.',
@@ -216,6 +246,15 @@ class AnnonceController extends Controller
             'categorie:id,nom',
             'prestataire:id,nom,prenom,localisation'
         ]);
+
+        $this->notifierAdmins(
+            'admin_annonce_en_attente',
+            'Annonce modifiée à valider',
+            'Une annonce a été modifiée par ' . $user->prenom . ' ' . $user->nom . ' et repasse en attente de validation.',
+            '/admin/annonces',
+            'annonce',
+            $annonce->id
+        );
 
         return response()->json([
             'message' => 'Annonce modifiée avec succès. Elle repasse en attente de validation.',

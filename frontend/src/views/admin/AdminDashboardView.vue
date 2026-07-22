@@ -117,19 +117,54 @@ function formatAmount(value) {
       </article>
 
       <article class="admin-stat-card">
+        <span>💬</span>
+        <h2>{{ stats.nombre_messages }}</h2>
+        <p>Messages</p>
+      </article>
+
+      <article class="admin-stat-card">
         <span>💶</span>
         <h2>{{ stats.nombre_paiements }}</h2>
         <p>Paiements</p>
       </article>
     </div>
 
-    <section v-if="!loading && stats" class="admin-total-card">
-      <div>
-        <h2>Montant total payé</h2>
-        <p>Total des paiements acceptés sur la plateforme.</p>
-      </div>
+    <section v-if="!loading && stats" class="admin-payment-summary">
+      <article class="admin-total-card">
+        <div>
+          <h2>Montant brut payé</h2>
+          <p>Total des paiements acceptés par les membres.</p>
+        </div>
 
-      <strong>{{ formatAmount(stats.montant_total_paiements) }}</strong>
+        <strong>{{ formatAmount(stats.montant_brut_paiements_acceptes) }}</strong>
+      </article>
+
+      <article class="admin-total-card">
+        <div>
+          <h2>Commission ServiceConnect</h2>
+          <p>Commission estimée à 10 % sur les paiements acceptés.</p>
+        </div>
+
+        <strong>{{ formatAmount(stats.commission_serviceconnect) }}</strong>
+      </article>
+
+      <article class="admin-total-card">
+        <div>
+          <h2>Frais Stripe estimés</h2>
+          <p>Estimation basée sur 1,5 % + 0,25 € par paiement Stripe accepté.</p>
+        </div>
+
+        <strong>{{ formatAmount(stats.frais_stripe_estimes) }}</strong>
+      </article>
+
+      <article class="admin-total-card">
+        <div>
+          <h2>Net prestataires</h2>
+          <p>Montant estimé à reverser aux prestataires après commission et frais Stripe.</p>
+        </div>
+
+        <strong>{{ formatAmount(stats.montant_net_prestataires) }}</strong>
+      </article>
     </section>
 
     <section class="admin-actions-grid">
@@ -149,6 +184,12 @@ function formatAmount(value) {
         <span>📂</span>
         <h2>Catégories</h2>
         <p>Créer, modifier ou désactiver les catégories de services.</p>
+      </RouterLink>
+
+      <RouterLink to="/admin/messages" class="admin-action-card">
+        <span>💬</span>
+        <h2>Messages</h2>
+        <p>Consulter les échanges entre membres et prestataires.</p>
       </RouterLink>
 
       <RouterLink to="/admin/avis" class="admin-action-card">

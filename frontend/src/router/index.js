@@ -64,6 +64,24 @@ const router = createRouter({
       },
     },
     {
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: () => import('../views/auth/ForgotPasswordView.vue'),
+      meta: {
+        title: 'Mot de passe oublié — ServiceConnect',
+        description: 'Demandez un lien de réinitialisation de mot de passe.',
+      },
+    },
+    {
+      path: '/reset-password',
+      name: 'reset-password',
+      component: () => import('../views/auth/ResetPasswordView.vue'),
+      meta: {
+        title: 'Réinitialiser le mot de passe — ServiceConnect',
+        description: 'Choisissez un nouveau mot de passe pour votre compte ServiceConnect.',
+      },
+    },
+    {
       path: '/register',
       name: 'register',
       component: () => import('../views/auth/RegisterView.vue'),
@@ -324,6 +342,17 @@ const router = createRouter({
         requiresAdmin: true,
         title: 'Gestion avis — ServiceConnect',
         description: 'Gestion des avis ServiceConnect.',
+      },
+    },
+    {
+      path: '/admin/messages',
+      name: 'admin-messages',
+      component: () => import('../views/admin/AdminMessagesView.vue'),
+      meta: {
+        requiresAuth: true,
+        requiresAdmin: true,
+        title: 'Messages — Administration ServiceConnect',
+        description: 'Consultation des messages échangés sur ServiceConnect.',
       },
     },
     {

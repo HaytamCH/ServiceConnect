@@ -13,6 +13,7 @@ class Message extends Model
         'expediteur_id',
         'destinataire_id',
         'reservation_id',
+        'annonce_id',
         'contenu',
         'lu',
     ];
@@ -34,5 +35,10 @@ class Message extends Model
     public function reservation()
     {
         return $this->belongsTo(Reservation::class, 'reservation_id');
+    }
+
+    public function annonce()
+    {
+        return $this->belongsTo(Annonce::class, 'annonce_id');
     }
 }

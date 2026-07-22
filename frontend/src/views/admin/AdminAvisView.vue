@@ -2,9 +2,12 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/axios'
+import { useNotificationStore } from '../../stores/notifications'
 
 const route = useRoute()
 const router = useRouter()
+
+const notifications = useNotificationStore()
 
 const avis = ref([])
 const loading = ref(true)
@@ -21,7 +24,17 @@ const search = ref(String(route.query.search || ''))
 onMounted(async () => {
   const pageFromUrl = Number(route.query.page || 1)
   await loadAvis(pageFromUrl)
+  await markAvisNotificationsAsRead()
 })
+
+async function markAvisNotificationsAsRead() {
+  try {
+    await api.patch('/notifications/mark-as-read?type=admin_avis_publie')
+    await notifications.loadSummary()
+  } catch (e) {
+    console.warn('Impossible de marquer les notifications avis comme lues.')
+  }
+}
 
 async function loadAvis(page = 1) {
   loading.value = true

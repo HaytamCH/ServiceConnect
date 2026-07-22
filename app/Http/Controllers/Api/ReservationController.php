@@ -113,7 +113,8 @@ class ReservationController extends Controller
         $reservations = Reservation::with([
             'annonce:id,titre,localisation,tarif',
             'prestataire:id,nom,prenom,localisation',
-            'disponibilite:id,date_debut,date_fin,disponible'
+            'disponibilite:id,date_debut,date_fin,disponible',
+            'paiement:id,reservation_id,montant,devise,methode,statut,transaction_externe_id'
         ])
             ->where('membre_id', $user->id)
             ->latest()
