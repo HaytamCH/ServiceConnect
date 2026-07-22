@@ -510,3 +510,65 @@
   background: #e0f2fe;
   color: #0284c7;
 }
+
+/* =========================
+   ADMIN - RESUME FINANCIER
+========================= */
+
+.admin-payment-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.admin-payment-summary .admin-total-card {
+  margin-bottom: 0;
+  background: #ffffff;
+  color: #07142f;
+  border: 1px solid #dde5ef;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
+}
+
+.admin-payment-summary .admin-total-card h2 {
+  color: #07142f;
+}
+
+.admin-payment-summary .admin-total-card p {
+  color: #5b6b84;
+}
+
+.admin-payment-summary .admin-total-card strong {
+  color: #07142f;
+  white-space: nowrap;
+}
+
+.admin-payment-summary .admin-total-card:nth-child(4) {
+  background: #07142f;
+  border-color: #07142f;
+  color: #ffffff;
+}
+
+.admin-payment-summary .admin-total-card:nth-child(4) h2,
+.admin-payment-summary .admin-total-card:nth-child(4) strong {
+  color: #ffffff;
+}
+
+.admin-payment-summary .admin-total-card:nth-child(4) p {
+  color: #cbd5e1;
+}
+
+@media (max-width: 900px) {
+  .admin-payment-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-payment-summary .admin-total-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-payment-summary .admin-total-card strong {
+    font-size: 28px;
+  }
+}
