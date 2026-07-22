@@ -619,3 +619,83 @@
     text-align: left;
   }
 }
+
+/* =========================
+   PRESTATAIRE - RESUME PAIEMENTS
+========================= */
+
+.payment-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.payment-summary-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.payment-summary-card span {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: #eef4ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.payment-summary-card h2 {
+  margin: 0 0 6px;
+  color: #0f172a;
+  font-size: 24px;
+}
+
+.payment-summary-card p {
+  margin: 0;
+  color: #64748b;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.payment-summary-card:nth-child(4) {
+  background: #07142f;
+  border-color: #07142f;
+}
+
+.payment-summary-card:nth-child(4) h2 {
+  color: #ffffff;
+}
+
+.payment-summary-card:nth-child(4) p {
+  color: #cbd5e1;
+}
+
+.payment-summary-card:nth-child(4) span {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 1100px) {
+  .payment-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .payment-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-summary-card {
+    align-items: flex-start;
+  }
+}
