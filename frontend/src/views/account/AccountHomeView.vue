@@ -203,10 +203,7 @@ function getRoleLabel(role) {
           <RouterLink to="/prestataire/dashboard" class="secondary-small-btn">
             {{ language.t('account.providerSpace') }}
           </RouterLink>
-
-          <RouterLink to="/prestataire/annonces" class="secondary-small-btn">
-            {{ language.t('account.myAnnouncements') }}
-          </RouterLink>
+          
         </template>
 
         <template v-if="isAdmin">
