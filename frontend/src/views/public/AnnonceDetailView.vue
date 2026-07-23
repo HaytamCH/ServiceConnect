@@ -305,6 +305,20 @@ function formatDate(date) {
 function reviewsLabel(count) {
   return language.t('announcementDetail.reviews').replace('{count}', count)
 }
+
+function getReviewAuthorName(membre) {
+  if (!membre) {
+    return 'Membre'
+  }
+
+  return `${membre.prenom || ''} ${membre.nom || ''}`.trim()
+}
+
+function renderStars(note) {
+  const value = Number(note || 0)
+  return '★'.repeat(value) + '☆'.repeat(5 - value)
+}
+
 </script>
 
 <template>
@@ -457,6 +471,37 @@ function reviewsLabel(count) {
         <p v-if="shareError" class="error-message">
           {{ shareError }}
         </p>
+
+        <section class="detail-reviews-section">
+          <div class="detail-reviews-header">
+            <h2>Avis clients</h2>
+            <span>{{ annonce.nombre_avis || 0 }} avis</span>
+          </div>
+
+          <div v-if="annonce.avis?.length" class="detail-review-list">
+            <article
+              v-for="avis in annonce.avis"
+              :key="avis.id"
+              class="detail-review-card"
+            >
+              <div class="detail-review-top">
+                <div>
+                  <strong>{{ getReviewAuthorName(avis.membre) }}</strong>
+                  <p>{{ renderStars(avis.note) }} {{ avis.note }}/5</p>
+                </div>
+              </div>
+
+              <p class="detail-review-comment">
+                {{ avis.commentaire || 'Aucun commentaire ajouté.' }}
+              </p>
+            </article>
+          </div>
+
+          <p v-else class="muted-text">
+            Aucun avis client visible pour le moment.
+          </p>
+        </section>
+
       </main>
 
       <aside class="provider-card">
