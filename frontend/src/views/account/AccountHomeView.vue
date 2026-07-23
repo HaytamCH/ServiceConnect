@@ -19,7 +19,8 @@ const visibleNotificationsCount = computed(() => {
     return (
       notifications.adminAnnoncesEnAttente +
       notifications.adminAvisAModerer +
-      notifications.adminMessagesASurveiller
+      notifications.adminMessagesASurveiller +
+      notifications.adminDemandesPrestataires
     )
   }
 
@@ -29,11 +30,14 @@ const visibleNotificationsCount = computed(() => {
     notifications.reservationsAcceptees +
     notifications.reservationsRefusees +
     notifications.reservationsAlternatives +
-    notifications.avisRecus
+    notifications.avisRecus +
+    notifications.demandePrestataireAcceptee +
+    notifications.demandePrestataireRefusee
   )
 })
 
 const hasNotifications = computed(() => visibleNotificationsCount.value > 0)
+
 onMounted(async () => {
   await notifications.loadSummary()
 })
@@ -138,7 +142,37 @@ function getRoleLabel(role) {
             <p>nouvel avis reçu</p>
           </RouterLink>
 
+          <RouterLink
+            v-if="notifications.demandePrestataireAcceptee > 0"
+            to="/prestataire/dashboard"
+            class="notification-item"
+          >
+            <span>✅</span>
+            <strong>{{ notifications.demandePrestataireAcceptee }}</strong>
+            <p>demande prestataire acceptée</p>
+          </RouterLink>
+
+          <RouterLink
+            v-if="notifications.demandePrestataireRefusee > 0"
+            to="/devenir-prestataire"
+            class="notification-item"
+          >
+            <span>❌</span>
+            <strong>{{ notifications.demandePrestataireRefusee }}</strong>
+            <p>demande prestataire refusée</p>
+          </RouterLink>
+
           <template v-if="isAdmin">
+            <RouterLink
+              v-if="notifications.adminDemandesPrestataires > 0"
+              to="/admin/users"
+              class="notification-item"
+            >
+              <span>🧾</span>
+              <strong>{{ notifications.adminDemandesPrestataires }}</strong>
+              <p>demande(s) prestataire à traiter</p>
+            </RouterLink>
+
             <RouterLink
               v-if="notifications.adminAnnoncesEnAttente > 0"
               to="/admin/annonces"

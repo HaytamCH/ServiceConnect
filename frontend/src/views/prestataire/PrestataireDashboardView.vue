@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import api from '../../api/axios'
 import { useAuthStore } from '../../stores/auth'
 import { useLanguageStore } from '../../stores/language'
+import { useNotificationStore } from '../../stores/notifications'
 
 const auth = useAuthStore()
 const language = useLanguageStore()
@@ -13,9 +14,22 @@ const error = ref('')
 
 const user = computed(() => auth.user)
 
-onMounted(async () => {
+const notifications = useNotificationStore()
+
+oonMounted(async () => {
   await loadDashboard()
+  await markProviderAcceptedNotificationAsRead()
 })
+
+
+async function markProviderAcceptedNotificationAsRead() {
+  try {
+    await api.patch('/notifications/mark-as-read?type=demande_prestataire_acceptee')
+    await notifications.loadSummary()
+  } catch (e) {
+    console.warn('Impossible de marquer la notification prestataire acceptée comme lue.')
+  }
+}
 
 async function loadDashboard() {
   loading.value = true

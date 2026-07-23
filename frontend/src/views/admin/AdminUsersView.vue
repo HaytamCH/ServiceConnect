@@ -24,6 +24,7 @@ const search = ref(String(route.query.search || ''))
 onMounted(async () => {
   const pageFromUrl = Number(route.query.page || 1)
   await loadUsers(pageFromUrl)
+  await markProviderRequestNotificationsAsRead()
 })
 
 async function loadUsers(page = 1) {
@@ -50,6 +51,14 @@ async function loadUsers(page = 1) {
     error.value = e.response?.data?.message || 'Impossible de charger les utilisateurs.'
   } finally {
     loading.value = false
+  }
+}
+
+async function markProviderRequestNotificationsAsRead() {
+  try {
+    await api.patch('/notifications/mark-as-read?type=admin_demande_prestataire')
+  } catch (e) {
+    console.warn('Impossible de marquer les notifications de demandes prestataires comme lues.')
   }
 }
 
@@ -312,7 +321,7 @@ function canEditStatus(user) {
               </span>
 
               <div
-                v-if="user.demande_prestataire_statut === 'en_attente'"
+                v-if="['en_attente', 'refusee'].includes(user.demande_prestataire_statut)"
                 class="admin-request-actions"
               >
                 <small v-if="user.demande_prestataire_description">
@@ -333,6 +342,7 @@ function canEditStatus(user) {
                 </button>
 
                 <button
+                  v-if="user.demande_prestataire_statut === 'en_attente'"
                   type="button"
                   class="secondary-small-btn"
                   :disabled="updatingId === user.id"
@@ -353,6 +363,19 @@ function canEditStatus(user) {
                 <option value="suspendu">Suspendu</option>
                 <option value="desactive">Désactivé</option>
               </select>
+              <RouterLink
+                v-if="user.id !== auth.user?.id"
+                :to="{
+                    path: '/mes-messages',
+                    query: {
+                      destinataire_id: user.id,
+                      destinataire_nom: getUserName(user)
+                    }
+                  }"
+                class="secondary-small-btn admin-contact-btn"
+              >
+                Contacter
+              </RouterLink>
 
               <small v-if="!canEditStatus(user)" class="admin-note">
                 Compte admin actuel

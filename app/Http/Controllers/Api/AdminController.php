@@ -660,9 +660,9 @@ class AdminController extends Controller
             ], 404);
         }
 
-        if ($user->demande_prestataire_statut !== 'en_attente') {
+        if (!in_array($user->demande_prestataire_statut, ['en_attente', 'refusee'])) {
             return response()->json([
-                'message' => 'Cet utilisateur n’a pas de demande prestataire en attente.'
+                'message' => 'Cette demande prestataire ne peut pas être acceptée.'
             ], 422);
         }
 

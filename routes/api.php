@@ -91,6 +91,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/messages', [MessageController::class, 'index']);
         Route::post('/messages', [MessageController::class, 'store']);
         Route::patch('/messages/mark-as-read', [MessageController::class, 'markAsRead']);
+        Route::get('/support/admin-contact', [MessageController::class, 'adminContact']);
 
         /*
         |--------------------------------------------------------------------------

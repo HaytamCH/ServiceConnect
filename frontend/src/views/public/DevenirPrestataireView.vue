@@ -1,9 +1,10 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api/axios'
 import { useAuthStore } from '../../stores/auth'
 import { useLanguageStore } from '../../stores/language'
+import { useNotificationStore } from '../../stores/notifications'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -17,6 +18,8 @@ const isConnected = computed(() => auth.isAuthenticated)
 const isMembre = computed(() => auth.user?.role === 'membre')
 const isPrestataire = computed(() => auth.user?.role === 'prestataire')
 
+const notifications = useNotificationStore()
+
 const form = ref({
   description_profil: '',
   localisation: auth.user?.localisation || '',
@@ -26,6 +29,42 @@ const form = ref({
 const demandeStatut = computed(() => auth.user?.demande_prestataire_statut || 'aucune')
 const hasPendingRequest = computed(() => demandeStatut.value === 'en_attente')
 const hasRejectedRequest = computed(() => demandeStatut.value === 'refusee')
+
+
+async function contactAdmin() {
+  error.value = ''
+
+  try {
+    const response = await api.get('/support/admin-contact')
+    const admin = response.data.data
+
+    router.push({
+      path: '/mes-messages',
+      query: {
+        destinataire_id: admin.id,
+        destinataire_nom: `${admin.prenom} ${admin.nom}`,
+      },
+    })
+  } catch (e) {
+    error.value = e.response?.data?.message || 'Impossible de contacter l’administrateur.'
+  }
+}
+
+
+onMounted(async () => {
+  if (auth.isAuthenticated) {
+    await auth.fetchUser()
+  }
+
+  if (auth.user?.demande_prestataire_statut === 'refusee') {
+    try {
+      await api.patch('/notifications/mark-as-read?type=demande_prestataire_refusee')
+      await notifications.loadSummary()
+    } catch (e) {
+      console.warn('Notification de refus non marquée comme lue.')
+    }
+  }
+})
 
 async function submitDevenirPrestataire() {
   loading.value = true
@@ -44,6 +83,12 @@ async function submitDevenirPrestataire() {
     return
   }
 
+  if (!form.value.telephone.trim()) {
+    error.value = 'Le numéro de téléphone est obligatoire pour devenir prestataire.'
+    loading.value = false
+    return
+  }
+
   try {
     const response = await api.patch('/devenir-prestataire', {
       description_profil: form.value.description_profil.trim(),
@@ -57,6 +102,7 @@ async function submitDevenirPrestataire() {
     localStorage.setItem('user', JSON.stringify(user))
 
     success.value = 'Votre demande a été envoyée. Elle doit être validée par un administrateur.'
+    await auth.fetchUser()
 
   } catch (e) {
     error.value = e.response?.data?.message || language.t('becomeProvider.errorActivate')
@@ -136,6 +182,20 @@ async function submitDevenirPrestataire() {
             {{ language.t('becomeProvider.activateText') }}
           </p>
 
+          <div v-if="hasRejectedRequest" class="provider-request-refused">
+            <h3>Demande refusée</h3>
+
+            <p>
+              Votre demande pour devenir prestataire a été refusée par l’administrateur.
+              Si vous souhaitez obtenir plus d’informations ou compléter votre demande,
+              vous pouvez contacter l’administrateur.
+            </p>
+
+            <button type="button" class="secondary-small-btn" @click="contactAdmin">
+              Contacter l’administrateur
+            </button>
+          </div>
+
           <p v-if="error" class="error-message">
             {{ error }}
           </p>
@@ -174,6 +234,7 @@ async function submitDevenirPrestataire() {
                 v-model="form.telephone"
                 type="text"
                 placeholder="+32 470 00 00 00"
+                required
               />
             </div>
           </div>

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -58,6 +60,26 @@ class ProfileController extends Controller
         ]);
     }
 
+    private function notifierAdmins($type, $titre, $message, $lien, $relatedType, $relatedId)
+    {
+        $admins = User::where('role', 'administrateur')
+            ->where('statut', 'actif')
+            ->get();
+
+        foreach ($admins as $admin) {
+            UserNotification::create([
+                'user_id' => $admin->id,
+                'type' => $type,
+                'titre' => $titre,
+                'message' => $message,
+                'lien' => $lien,
+                'related_type' => $relatedType,
+                'related_id' => $relatedId,
+                'lu' => false,
+            ]);
+        }
+    }
+
     private function formatUser($user)
     {
         return [
@@ -88,7 +110,25 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'ancien_mot_de_passe' => 'required|string',
-            'nouveau_mot_de_passe' => 'required|string|min:8|confirmed',
+            'nouveau_mot_de_passe' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                function ($attribute, $value, $fail) {
+                    if (!preg_match('/[A-Z]/', $value)) {
+                        $fail('Le nouveau mot de passe doit contenir au moins une majuscule.');
+                    }
+
+                    if (!preg_match('/[0-9]/', $value)) {
+                        $fail('Le nouveau mot de passe doit contenir au moins un chiffre.');
+                    }
+
+                    if (!preg_match('/[^A-Za-z0-9]/', $value)) {
+                        $fail('Le nouveau mot de passe doit contenir au moins un caractère spécial.');
+                    }
+                },
+            ],
         ]);
 
         if (!Hash::check($validated['ancien_mot_de_passe'], $user->password)) {
@@ -134,17 +174,26 @@ class ProfileController extends Controller
         $validated = $request->validate([
             'description_profil' => 'required|string|min:20',
             'localisation' => 'required|string|max:255',
-            'telephone' => 'nullable|string|max:30',
+            'telephone' => 'required|string|max:30',
         ]);
 
         $user->update([
             'demande_prestataire_statut' => 'en_attente',
             'demande_prestataire_description' => $validated['description_profil'],
             'demande_prestataire_localisation' => $validated['localisation'],
-            'demande_prestataire_telephone' => $validated['telephone'] ?? $user->telephone,
+            'demande_prestataire_telephone' => $validated['telephone'],
             'demande_prestataire_date' => now(),
             'demande_prestataire_decision_at' => null,
         ]);
+
+        $this->notifierAdmins(
+            'admin_demande_prestataire',
+            'Nouvelle demande prestataire',
+            $user->prenom . ' ' . $user->nom . ' souhaite devenir prestataire.',
+            '/admin/users',
+            'user',
+            $user->id
+        );
 
         return response()->json([
             'message' => 'Votre demande prestataire a été envoyée. Elle doit être validée par un administrateur.',

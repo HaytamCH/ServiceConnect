@@ -606,3 +606,8 @@
   background: #e5e7eb;
   color: #475569;
 }
+
+.admin-contact-btn {
+  margin-top: 8px;
+  display: inline-flex;
+}

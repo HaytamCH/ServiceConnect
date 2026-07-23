@@ -29,11 +29,18 @@ const emptySummary = {
     recus: 0,
   },
 
+  demande_prestataire: {
+    acceptee: 0,
+    refusee: 0,
+  },
+
   admin: {
     annonces_en_attente: 0,
     avis_a_moderer: 0,
     messages_a_surveiller: 0,
+    demandes_prestataires: 0,
   },
+
 }
 
 export const useNotificationStore = defineStore('notifications', {
@@ -83,6 +90,15 @@ export const useNotificationStore = defineStore('notifications', {
 
     adminMessagesASurveiller: (state) =>
       state.summary?.admin?.messages_a_surveiller || 0,
+
+    demandePrestataireAcceptee: (state) =>
+      state.summary?.demande_prestataire?.acceptee || 0,
+
+    demandePrestataireRefusee: (state) =>
+      state.summary?.demande_prestataire?.refusee || 0,
+
+    adminDemandesPrestataires: (state) =>
+      state.summary?.admin?.demandes_prestataires || 0,
   },
 
   actions: {

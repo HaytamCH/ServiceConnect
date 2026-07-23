@@ -190,4 +190,23 @@ class MessageController extends Controller
             'message' => 'Messages marqués comme lus.'
         ]);
     }
+
+    public function adminContact(Request $request)
+    {
+        $admin = User::where('role', 'administrateur')
+            ->where('statut', 'actif')
+            ->select('id', 'nom', 'prenom', 'email')
+            ->first();
+
+        if (!$admin) {
+            return response()->json([
+                'message' => 'Aucun administrateur disponible pour le moment.'
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => $admin
+        ]);
+    }
+
 }
