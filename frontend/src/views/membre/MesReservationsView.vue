@@ -14,6 +14,13 @@ const error = ref('')
 const paymentError = ref('')
 const payingReservationId = ref(null)
 
+const activeReviewReservationId = ref(null)
+const postingReviewId = ref(null)
+const reviewError = ref('')
+const reviewSuccess = ref('')
+
+const reviewForms = ref({})
+
 onMounted(async () => {
   await loadReservations()
   await markReservationNotificationsAsRead()
@@ -107,10 +114,6 @@ function isReservationPaid(reservation) {
   return getPaiement(reservation)?.statut === 'accepte'
 }
 
-function isPaymentPending(reservation) {
-  return getPaiement(reservation)?.statut === 'en_attente'
-}
-
 function paymentLabel(reservation) {
   const paiement = getPaiement(reservation)
 
@@ -126,6 +129,73 @@ function paymentLabel(reservation) {
   }
 
   return labels[paiement.statut] || paiement.statut
+}
+
+function hasAvis(reservation) {
+  return Array.isArray(reservation.avis) && reservation.avis.length > 0
+}
+
+function getAvis(reservation) {
+  if (!hasAvis(reservation)) {
+    return null
+  }
+
+  return reservation.avis[0]
+}
+
+function canLeaveAvis(reservation) {
+  return ['acceptee', 'terminee'].includes(reservation.statut) && !hasAvis(reservation)
+}
+
+function toggleReviewForm(reservation) {
+  reviewError.value = ''
+  reviewSuccess.value = ''
+
+  if (activeReviewReservationId.value === reservation.id) {
+    activeReviewReservationId.value = null
+    return
+  }
+
+  activeReviewReservationId.value = reservation.id
+
+  if (!reviewForms.value[reservation.id]) {
+    reviewForms.value[reservation.id] = {
+      note: 5,
+      commentaire: '',
+    }
+  }
+}
+
+async function submitAvis(reservation) {
+  reviewError.value = ''
+  reviewSuccess.value = ''
+  postingReviewId.value = reservation.id
+
+  const form = reviewForms.value[reservation.id]
+
+  if (!form || !form.note) {
+    reviewError.value = 'Veuillez sélectionner une note.'
+    postingReviewId.value = null
+    return
+  }
+
+  try {
+    await api.post('/avis', {
+      reservation_id: reservation.id,
+      note: Number(form.note),
+      commentaire: form.commentaire.trim(),
+    })
+
+    reviewSuccess.value = 'Votre avis a été publié avec succès.'
+    activeReviewReservationId.value = null
+
+    await loadReservations()
+  } catch (e) {
+    reviewError.value =
+      e.response?.data?.message || 'Impossible de publier cet avis.'
+  } finally {
+    postingReviewId.value = null
+  }
 }
 </script>
 
@@ -161,6 +231,14 @@ function paymentLabel(reservation) {
       {{ paymentError }}
     </p>
 
+    <p v-if="reviewError" class="error-message">
+      {{ reviewError }}
+    </p>
+
+    <p v-if="reviewSuccess" class="success-message">
+      {{ reviewSuccess }}
+    </p>
+
     <div v-if="!loading && reservations.length" class="reservation-list">
       <article
         v-for="reservation in reservations"
@@ -189,6 +267,63 @@ function paymentLabel(reservation) {
             {{ language.t('reservations.message') }} :
             {{ reservation.message_demande }}
           </p>
+
+          <div v-if="hasAvis(reservation)" class="reservation-review-box">
+            <strong>Votre avis : {{ getAvis(reservation).note }}/5 ⭐</strong>
+            <p>
+              {{ getAvis(reservation).commentaire || 'Aucun commentaire ajouté.' }}
+            </p>
+          </div>
+
+          <div
+            v-if="activeReviewReservationId === reservation.id"
+            class="reservation-review-form"
+          >
+            <div class="form-group">
+              <label>Note</label>
+
+              <select v-model="reviewForms[reservation.id].note">
+                <option value="5">5 - Excellent</option>
+                <option value="4">4 - Très bien</option>
+                <option value="3">3 - Correct</option>
+                <option value="2">2 - Moyen</option>
+                <option value="1">1 - Mauvais</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Commentaire</label>
+
+              <textarea
+                v-model="reviewForms[reservation.id].commentaire"
+                rows="4"
+                placeholder="Partagez votre expérience avec ce prestataire..."
+              ></textarea>
+            </div>
+
+            <div class="review-form-actions">
+              <button
+                type="button"
+                class="primary-small-btn"
+                :disabled="postingReviewId === reservation.id"
+                @click="submitAvis(reservation)"
+              >
+                {{
+                  postingReviewId === reservation.id
+                    ? 'Publication...'
+                    : 'Publier l’avis'
+                }}
+              </button>
+
+              <button
+                type="button"
+                class="secondary-small-btn"
+                @click="toggleReviewForm(reservation)"
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
         </div>
 
         <div class="reservation-side">
@@ -215,6 +350,15 @@ function paymentLabel(reservation) {
                 ? language.t('reservations.paymentLoading')
                 : language.t('reservations.payWithStripe')
             }}
+          </button>
+
+          <button
+            v-if="canLeaveAvis(reservation)"
+            type="button"
+            class="secondary-small-btn"
+            @click="toggleReviewForm(reservation)"
+          >
+            Laisser un avis
           </button>
 
           <RouterLink

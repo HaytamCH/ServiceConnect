@@ -114,7 +114,8 @@ class ReservationController extends Controller
             'annonce:id,titre,localisation,tarif',
             'prestataire:id,nom,prenom,localisation',
             'disponibilite:id,date_debut,date_fin,disponible',
-            'paiement:id,reservation_id,montant,devise,methode,statut,transaction_externe_id'
+            'paiement:id,reservation_id,montant,devise,methode,statut,transaction_externe_id',
+            'avis:id,reservation_id,note,commentaire,visible,created_at'
         ])
             ->where('membre_id', $user->id)
             ->latest()
