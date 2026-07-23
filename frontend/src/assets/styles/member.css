@@ -601,3 +601,79 @@
     align-items: flex-start;
   }
 }
+
+/* =========================
+   MEMBRE - AVIS SUR RESERVATION
+========================= */
+
+.reservation-review-box {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.reservation-review-box strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #0f172a;
+}
+
+.reservation-review-box p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.reservation-review-form {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #dbeafe;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.reservation-review-form .form-group {
+  margin-bottom: 14px;
+}
+
+.reservation-review-form label {
+  display: block;
+  margin-bottom: 8px;
+  color: #334155;
+  font-weight: 800;
+}
+
+.reservation-review-form select,
+.reservation-review-form textarea {
+  width: 100%;
+  border: 1px solid #dbe2ea;
+  border-radius: 12px;
+  padding: 12px 14px;
+  outline: none;
+  font-size: 15px;
+  font-family: inherit;
+  background: #ffffff;
+}
+
+.reservation-review-form select {
+  height: 46px;
+}
+
+.reservation-review-form textarea {
+  resize: vertical;
+}
+
+.reservation-review-form select:focus,
+.reservation-review-form textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.review-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
