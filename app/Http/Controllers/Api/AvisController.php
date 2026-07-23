@@ -119,6 +119,17 @@ class AvisController extends Controller
             $avis->id
         );
 
+        UserNotification::create([
+            'user_id' => $reservation->prestataire_id,
+            'type' => 'avis_recu',
+            'titre' => 'Nouvel avis reçu',
+            'message' => $user->prenom . ' ' . $user->nom . ' vous a laissé un avis de ' . $validated['note'] . '/5.',
+            'lien' => '/prestataire/avis',
+            'related_type' => 'avis',
+            'related_id' => $avis->id,
+            'lu' => false,
+        ]);
+        
         return response()->json([
             'message' => 'Avis ajouté avec succès.',
             'data' => $avis
