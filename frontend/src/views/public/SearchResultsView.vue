@@ -154,6 +154,10 @@ async function resetFilters() {
   await loadAnnonces()
 }
 
+function getProfilePhotoUrl(user) {
+  return user?.photo_profil_url || ''
+}
+
 onMounted(async () => {
   try {
     await loadCategories()
@@ -266,8 +270,14 @@ onMounted(async () => {
             :key="annonce.id"
             class="annonce-card"
           >
-            <div class="provider-avatar">
-              {{ annonce.prestataire?.prenom?.charAt(0) || 'P' }}
+            <div class="provider-avatar user-avatar">
+              <img
+                v-if="getProfilePhotoUrl(annonce.prestataire)"
+                :src="getProfilePhotoUrl(annonce.prestataire)"
+                alt="Photo du prestataire"
+              />
+
+              <span v-else class="default-avatar-icon"></span>
             </div>
 
             <div class="annonce-info">

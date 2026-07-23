@@ -37,8 +37,8 @@ class MessageController extends Controller
         $user = $request->user();
 
         $messages = Message::with([
-            'expediteur:id,nom,prenom,role',
-            'destinataire:id,nom,prenom,role',
+            'expediteur:id,nom,prenom,role,photo_profil',
+            'destinataire:id,nom,prenom,role,photo_profil',
             'annonce:id,titre,statut',
             'reservation:id,annonce_id,statut',
             'reservation.annonce:id,titre,statut',
@@ -163,8 +163,8 @@ class MessageController extends Controller
         }
 
         $message->load([
-            'expediteur:id,nom,prenom,role',
-            'destinataire:id,nom,prenom,role',
+            'expediteur:id,nom,prenom,role,photo_profil',
+            'destinataire:id,nom,prenom,role,photo_profil',
             'annonce:id,titre,statut',
             'reservation:id,annonce_id,statut',
             'reservation.annonce:id,titre,statut',

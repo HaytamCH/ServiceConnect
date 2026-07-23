@@ -181,6 +181,10 @@ function getRoleLabel(role) {
           {{ language.t('account.viewServices') }}
         </RouterLink>
 
+        <RouterLink to="/mon-profil" class="secondary-small-btn">
+          Modifier mon profil
+        </RouterLink>
+
         <template v-if="isMembre">
           <RouterLink to="/mes-reservations" class="secondary-small-btn">
             {{ language.t('account.myReservations') }}

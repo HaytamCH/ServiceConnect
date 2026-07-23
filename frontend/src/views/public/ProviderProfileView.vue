@@ -38,6 +38,10 @@ onMounted(async () => {
   }
 })
 
+function getProfilePhotoUrl(user) {
+  return user?.photo_profil_url || ''
+}
+
 function extractArray(response) {
   return response.data.data || []
 }
@@ -125,8 +129,14 @@ async function toggleProviderFavorite() {
     <div v-if="prestataire" class="provider-profile-layout">
       <section class="provider-hero-card">
         <div class="provider-main-info">
-          <div class="provider-avatar-xl">
-            {{ prestataire.prenom?.charAt(0) || 'P' }}
+          <div class="provider-avatar-xl user-avatar">
+            <img
+              v-if="getProfilePhotoUrl(prestataire)"
+              :src="getProfilePhotoUrl(prestataire)"
+              alt="Photo du prestataire"
+            />
+
+            <span v-else class="default-avatar-icon"></span>
           </div>
 
           <div>

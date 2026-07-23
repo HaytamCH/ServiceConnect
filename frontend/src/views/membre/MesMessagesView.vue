@@ -89,6 +89,10 @@ async function sendMessage() {
   }
 }
 
+function getProfilePhotoUrl(user) {
+  return user?.photo_profil_url || ''
+}
+
 function formatDate(date) {
   if (!date) {
     return ''
@@ -181,8 +185,14 @@ function getAnnonceTitle(message) {
 
         <div v-if="!loading && messages.length" class="message-list">
           <article v-for="message in messages" :key="message.id" class="message-item">
-            <div class="message-avatar">
-              {{ message.expediteur?.prenom?.charAt(0) || 'U' }}
+            <div class="message-avatar user-avatar">
+              <img
+                v-if="getProfilePhotoUrl(message.expediteur)"
+                :src="getProfilePhotoUrl(message.expediteur)"
+                alt="Photo utilisateur"
+              />
+
+              <span v-else class="default-avatar-icon"></span>
             </div>
 
             <div class="message-content">

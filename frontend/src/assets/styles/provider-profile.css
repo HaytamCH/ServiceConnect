@@ -257,3 +257,11 @@
 .provider-side-card .secondary-action.full-width + .muted-text {
   margin-top: 10px;
 }
+.provider-avatar-xl.user-avatar {
+  font-size: 0;
+  background: #f1f5f9;
+}
+
+.provider-avatar-xl.user-avatar img {
+  border-radius: 26px;
+}

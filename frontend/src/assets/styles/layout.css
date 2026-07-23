@@ -151,3 +151,67 @@
   align-items: center;
   justify-content: center;
 }
+
+/* =========================
+   AVATAR UTILISATEUR GLOBAL
+========================= */
+
+.user-avatar {
+  position: relative;
+  overflow: hidden;
+  background: #f1f5f9;
+  border: 1px solid #dbe2ea;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Avatar neutre sans initiale */
+.default-avatar-icon {
+  position: relative;
+  width: 52%;
+  height: 52%;
+  display: block;
+}
+
+.default-avatar-icon::before {
+  content: "";
+  position: absolute;
+  top: 4%;
+  left: 50%;
+  width: 42%;
+  height: 42%;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #94a3b8;
+}
+
+.default-avatar-icon::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  width: 78%;
+  height: 42%;
+  transform: translateX(-50%);
+  border-radius: 999px 999px 12px 12px;
+  background: #94a3b8;
+}
+
+.header-user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+}
+
+.login-btn.account-link-with-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}

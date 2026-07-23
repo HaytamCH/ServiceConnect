@@ -6,6 +6,7 @@ import { useNotificationStore } from '../stores/notifications'
 import LanguageSwitcher from './LanguageSwitcher.vue'
 import { useLanguageStore } from '../stores/language'
 
+
 const router = useRouter()
 const auth = useAuthStore()
 const notifications = useNotificationStore()
@@ -14,6 +15,8 @@ const language = useLanguageStore()
 const isConnected = computed(() => auth.isAuthenticated)
 const user = computed(() => auth.user)
 const notificationTotal = computed(() => notifications.total)
+
+const userPhotoUrl = computed(() => user.value?.photo_profil_url || '')
 
 onMounted(async () => {
   if (isConnected.value) {
@@ -79,11 +82,16 @@ async function logout() {
       <LanguageSwitcher />
 
       <RouterLink v-if="isConnected" to="/mon-espace" class="login-btn account-link-with-badge">
-        👤 {{ user?.prenom || language.t('nav.account') }}
+        <span class="header-user-avatar user-avatar">
+          <img v-if="userPhotoUrl" :src="userPhotoUrl" alt="Photo de profil" />
+          <span v-else class="default-avatar-icon"></span>
+        </span>
+
+        <span>{{ user?.prenom || language.t('nav.account') }}</span>
 
         <span v-if="notificationTotal > 0" class="notification-badge">
-       {{ notificationTotal }}
-      </span>
+          {{ notificationTotal }}
+        </span>
       </RouterLink>
 
       <button v-if="isConnected" type="button" class="logout-btn" @click="logout">

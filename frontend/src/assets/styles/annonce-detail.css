@@ -117,9 +117,20 @@
 .primary-action,
 .secondary-action {
   height: 48px;
+  min-height: 48px;
   border-radius: 12px;
   font-weight: 800;
+  font-size: 15px;
+  line-height: 1;
+  font-family: inherit;
   cursor: pointer;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
+  box-sizing: border-box;
 }
 
 .primary-action {
@@ -320,4 +331,8 @@
   margin: 12px 0 0;
   color: #475569;
   line-height: 1.6;
+}
+.provider-avatar-large.user-avatar {
+  font-size: 0;
+  background: #f1f5f9;
 }

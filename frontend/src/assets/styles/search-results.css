@@ -283,3 +283,13 @@
     grid-template-columns: 1fr;
   }
 }
+/* =========================
+   AVATAR PRESTATAIRE - LISTE ANNONCES
+========================= */
+
+.provider-avatar.user-avatar {
+  font-size: 0;
+  background: #f1f5f9;
+  border: 1px solid #dbe2ea;
+}
+

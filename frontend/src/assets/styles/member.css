@@ -677,3 +677,8 @@
   flex-wrap: wrap;
   gap: 10px;
 }
+
+.message-avatar.user-avatar {
+  font-size: 0;
+  background: #f1f5f9;
+}
