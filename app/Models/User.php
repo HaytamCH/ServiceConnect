@@ -27,6 +27,7 @@ class User extends Authenticatable
         'statut',
         'langue',
         'description_profil',
+        'photo_profil',
         'localisation',
         'paiement_active',
     ];
@@ -50,6 +51,19 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'paiement_active' => 'boolean',
     ];
+
+    protected $appends = [
+        'photo_profil_url',
+    ];
+
+    public function getPhotoProfilUrlAttribute()
+    {
+        if (!$this->photo_profil) {
+            return null;
+        }
+
+        return asset('storage/' . $this->photo_profil);
+    }
     /*
     |--------------------------------------------------------------------------
     | Relations liées au rôle prestataire

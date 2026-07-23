@@ -101,6 +101,16 @@ const router = createRouter({
       },
     },
     {
+      path: '/mon-profil',
+      name: 'profile-edit',
+      component: () => import('../views/account/ProfileEditView.vue'),
+      meta: {
+        requiresAuth: true,
+        title: 'Modifier mon profil — ServiceConnect',
+        description: 'Modifiez vos informations personnelles sur ServiceConnect.',
+      },
+    },
+    {
       path: '/mes-reservations',
       name: 'mes-reservations',
       component: () => import('../views/membre/MesReservationsView.vue'),

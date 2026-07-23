@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -26,9 +27,10 @@ class ProfileController extends Controller
             'langue' => 'nullable|string|max:10',
             'localisation' => 'nullable|string|max:255',
             'description_profil' => 'nullable|string',
+            'photo_profil' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        $user->update([
+        $data = [
             'nom' => $validated['nom'],
             'prenom' => $validated['prenom'],
             'email' => $validated['email'],
@@ -36,24 +38,43 @@ class ProfileController extends Controller
             'langue' => $validated['langue'] ?? $user->langue,
             'localisation' => $validated['localisation'] ?? null,
             'description_profil' => $validated['description_profil'] ?? null,
-        ]);
+        ];
+
+        if ($request->hasFile('photo_profil')) {
+            if ($user->photo_profil) {
+                Storage::disk('public')->delete($user->photo_profil);
+            }
+
+            $data['photo_profil'] = $request->file('photo_profil')
+                ->store('profile_photos', 'public');
+        }
+
+        $user->update($data);
+        $user->refresh();
 
         return response()->json([
             'message' => 'Profil mis à jour avec succès.',
-            'data' => [
-                'id' => $user->id,
-                'nom' => $user->nom,
-                'prenom' => $user->prenom,
-                'email' => $user->email,
-                'telephone' => $user->telephone,
-                'role' => $user->role,
-                'statut' => $user->statut,
-                'langue' => $user->langue,
-                'localisation' => $user->localisation,
-                'description_profil' => $user->description_profil,
-                'paiement_active' => $user->paiement_active,
-            ]
+            'data' => $this->formatUser($user)
         ]);
+    }
+
+    private function formatUser($user)
+    {
+        return [
+            'id' => $user->id,
+            'nom' => $user->nom,
+            'prenom' => $user->prenom,
+            'email' => $user->email,
+            'telephone' => $user->telephone,
+            'role' => $user->role,
+            'statut' => $user->statut,
+            'langue' => $user->langue,
+            'localisation' => $user->localisation,
+            'description_profil' => $user->description_profil,
+            'photo_profil' => $user->photo_profil,
+            'photo_profil_url' => $user->photo_profil_url,
+            'paiement_active' => $user->paiement_active,
+        ];
     }
 
     public function updatePassword(Request $request)
@@ -114,7 +135,7 @@ class ProfileController extends Controller
 
         return response()->json([
             'message' => 'Votre profil prestataire a été activé avec succès.',
-            'data' => $user
+            'data' => $this->formatUser($user->fresh())
         ]);
     }
 }

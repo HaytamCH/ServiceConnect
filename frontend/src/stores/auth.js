@@ -58,6 +58,11 @@ export const useAuthStore = defineStore('auth', {
       return this.user
     },
 
+    setUser(user) {
+      this.user = user
+      localStorage.setItem('user', JSON.stringify(this.user))
+    },
+
     async logout() {
       try {
         if (this.token) {

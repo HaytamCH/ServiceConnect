@@ -67,6 +67,7 @@ Route::prefix('v1')->group(function () {
         |--------------------------------------------------------------------------
         */
 
+        Route::post('/profile', [ProfileController::class, 'update']);
         Route::put('/profile', [ProfileController::class, 'update']);
         Route::patch('/profile/password', [ProfileController::class, 'updatePassword']);
         Route::patch('/devenir-prestataire', [ProfileController::class, 'devenirPrestataire']);

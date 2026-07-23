@@ -61,11 +61,14 @@ class PrestataireController extends Controller
                 'prenom' => $prestataire->prenom,
                 'localisation' => $prestataire->localisation,
                 'description_profil' => $prestataire->description_profil,
+                'photo_profil' => $prestataire->photo_profil,
+                'photo_profil_url' => $prestataire->photo_profil_url,
                 'paiement_active' => $prestataire->paiement_active,
                 'note_moyenne' => $noteMoyenne ? round($noteMoyenne, 1) : null,
                 'nombre_avis' => $nombreAvis,
                 'annonces' => $prestataire->annonces,
                 'nombre_likes' => $nombreLikes,
+
             ]
         ]);
     }

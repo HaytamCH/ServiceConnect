@@ -34,7 +34,7 @@ class AnnonceController extends Controller
     {
         $query = Annonce::with([
             'categorie:id,nom',
-            'prestataire:id,nom,prenom,localisation,description_profil'
+            'prestataire:id,nom,prenom,localisation,description_profil,photo_profil'
         ])
             ->withCount('likes')
             ->where('statut', 'publiee');
@@ -176,7 +176,7 @@ class AnnonceController extends Controller
 
         $annonce->load([
             'categorie:id,nom',
-            'prestataire:id,nom,prenom,localisation'
+            'prestataire:id,nom,prenom,localisation,photo_profil'
         ]);
         $this->notifierAdmins(
             'admin_annonce_en_attente',
@@ -244,7 +244,7 @@ class AnnonceController extends Controller
 
         $annonce->load([
             'categorie:id,nom',
-            'prestataire:id,nom,prenom,localisation'
+            'prestataire:id,nom,prenom,localisation,photo_profil'
         ]);
 
         $this->notifierAdmins(

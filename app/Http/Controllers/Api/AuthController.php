@@ -13,6 +13,25 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 class AuthController extends Controller
 {
+    private function formatUser($user)
+    {
+        return [
+            'id' => $user->id,
+            'nom' => $user->nom,
+            'prenom' => $user->prenom,
+            'email' => $user->email,
+            'telephone' => $user->telephone,
+            'role' => $user->role,
+            'statut' => $user->statut,
+            'langue' => $user->langue,
+            'localisation' => $user->localisation,
+            'description_profil' => $user->description_profil,
+            'photo_profil' => $user->photo_profil,
+            'photo_profil_url' => $user->photo_profil_url,
+            'paiement_active' => $user->paiement_active,
+        ];
+    }
+
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -46,14 +65,7 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Inscription réussie.',
             'token' => $token,
-            'user' => [
-                'id' => $user->id,
-                'nom' => $user->nom,
-                'prenom' => $user->prenom,
-                'email' => $user->email,
-                'role' => $user->role,
-                'statut' => $user->statut,
-            ]
+            'user' => $this->formatUser($user),
         ], 201);
     }
 
@@ -83,14 +95,7 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Connexion réussie.',
             'token' => $token,
-            'user' => [
-                'id' => $user->id,
-                'nom' => $user->nom,
-                'prenom' => $user->prenom,
-                'email' => $user->email,
-                'role' => $user->role,
-                'statut' => $user->statut,
-            ]
+            'user' => $this->formatUser($user),
         ]);
     }
 
@@ -99,19 +104,7 @@ class AuthController extends Controller
         $user = $request->user();
 
         return response()->json([
-            'data' => [
-                'id' => $user->id,
-                'nom' => $user->nom,
-                'prenom' => $user->prenom,
-                'email' => $user->email,
-                'telephone' => $user->telephone,
-                'role' => $user->role,
-                'statut' => $user->statut,
-                'langue' => $user->langue,
-                'localisation' => $user->localisation,
-                'description_profil' => $user->description_profil,
-                'paiement_active' => $user->paiement_active,
-            ]
+            'data' => $this->formatUser($user)
         ]);
     }
 
