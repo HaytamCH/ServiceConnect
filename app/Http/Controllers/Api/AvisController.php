@@ -129,7 +129,7 @@ class AvisController extends Controller
             'related_id' => $avis->id,
             'lu' => false,
         ]);
-        
+
         return response()->json([
             'message' => 'Avis ajouté avec succès.',
             'data' => $avis

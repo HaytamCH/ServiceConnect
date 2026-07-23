@@ -8,6 +8,10 @@ const emptySummary = {
     non_lus: 0,
   },
 
+  avis_prestataire: {
+    recus: 0,
+  },
+
   reservations_membre: {
     acceptees: 0,
     refusees: 0,
@@ -67,6 +71,9 @@ export const useNotificationStore = defineStore('notifications', {
 
     paiementsRecus: (state) =>
       state.summary?.paiements?.recus || 0,
+
+    avisRecus: (state) =>
+      state.summary?.avis_prestataire?.recus || 0,
 
     adminAnnoncesEnAttente: (state) =>
       state.summary?.admin?.annonces_en_attente || 0,

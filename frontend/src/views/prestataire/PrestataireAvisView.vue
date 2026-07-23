@@ -2,8 +2,11 @@
 import { onMounted, ref } from 'vue'
 import api from '../../api/axios'
 import { useLanguageStore } from '../../stores/language'
+import { useNotificationStore } from '../../stores/notifications'
+
 
 const language = useLanguageStore()
+const notifications = useNotificationStore()
 
 const avis = ref([])
 const loading = ref(true)
@@ -11,8 +14,17 @@ const error = ref('')
 
 onMounted(async () => {
   await loadAvis()
+  await markReviewNotificationsAsRead()
 })
 
+async function markReviewNotificationsAsRead() {
+  try {
+    await api.patch('/notifications/mark-as-read?type=avis_recu')
+    await notifications.loadSummary()
+  } catch (e) {
+    console.warn('Impossible de marquer les notifications d’avis comme lues.')
+  }
+}
 async function loadAvis() {
   loading.value = true
   error.value = ''

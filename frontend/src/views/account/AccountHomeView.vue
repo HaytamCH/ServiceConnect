@@ -28,7 +28,8 @@ const visibleNotificationsCount = computed(() => {
     notifications.reservationsPrestataireEnAttente +
     notifications.reservationsAcceptees +
     notifications.reservationsRefusees +
-    notifications.reservationsAlternatives
+    notifications.reservationsAlternatives +
+    notifications.avisRecus
   )
 })
 
@@ -125,6 +126,16 @@ function getRoleLabel(role) {
             <span>🔁</span>
             <strong>{{ notifications.reservationsAlternatives }}</strong>
             <p>alternative(s) proposée(s)</p>
+          </RouterLink>
+
+          <RouterLink
+            v-if="notifications.avisRecus > 0"
+            to="/prestataire/avis"
+            class="notification-item"
+          >
+            <span>⭐</span>
+            <strong>{{ notifications.avisRecus }}</strong>
+            <p>nouvel avis reçu</p>
           </RouterLink>
 
           <template v-if="isAdmin">
