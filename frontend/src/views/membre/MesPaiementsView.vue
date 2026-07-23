@@ -154,6 +154,40 @@ function methodeLabel(methode) {
       {{ error }}
     </p>
 
+    <section v-if="!loading && paiements.length" class="member-payment-summary-grid">
+      <article class="member-payment-summary-card">
+        <span>💶</span>
+        <div>
+          <h2>{{ formatCurrency(totalPaye) }}</h2>
+          <p>Total payé</p>
+        </div>
+      </article>
+
+      <article class="member-payment-summary-card">
+        <span>✅</span>
+        <div>
+          <h2>{{ paiementsAcceptes.length }}</h2>
+          <p>Paiement(s) accepté(s)</p>
+        </div>
+      </article>
+
+      <article class="member-payment-summary-card">
+        <span>⏳</span>
+        <div>
+          <h2>{{ paiementsEnAttente.length }}</h2>
+          <p>Paiement(s) en attente</p>
+        </div>
+      </article>
+
+      <article class="member-payment-summary-card">
+        <span>❌</span>
+        <div>
+          <h2>{{ paiementsRefuses.length }}</h2>
+          <p>Paiement(s) refusé(s)</p>
+        </div>
+      </article>
+    </section>
+
     <div v-if="!loading && paiements.length" class="payment-list">
       <article
         v-for="paiement in paiements"
