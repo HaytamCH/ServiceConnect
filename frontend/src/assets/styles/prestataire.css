@@ -626,7 +626,7 @@
 
 .payment-summary-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
   margin-bottom: 28px;
 }
@@ -667,20 +667,20 @@
   line-height: 1.4;
 }
 
-.payment-summary-card:nth-child(4) {
+.payment-summary-card:nth-child(3) {
   background: #07142f;
   border-color: #07142f;
 }
 
-.payment-summary-card:nth-child(4) h2 {
+.payment-summary-card:nth-child(3) h2 {
   color: #ffffff;
 }
 
-.payment-summary-card:nth-child(4) p {
+.payment-summary-card:nth-child(3) p {
   color: #cbd5e1;
 }
 
-.payment-summary-card:nth-child(4) span {
+.payment-summary-card:nth-child(3) span {
   background: rgba(255, 255, 255, 0.12);
 }
 

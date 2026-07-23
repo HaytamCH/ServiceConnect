@@ -209,7 +209,7 @@ function getAnnonceTitle(paiement) {
           <p>Commission ServiceConnect estimée</p>
         </div>
       </article>
-      
+
 
       <article class="payment-summary-card">
         <span>✅</span>
