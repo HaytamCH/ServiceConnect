@@ -74,6 +74,11 @@ class ProfileController extends Controller
             'photo_profil' => $user->photo_profil,
             'photo_profil_url' => $user->photo_profil_url,
             'paiement_active' => $user->paiement_active,
+            'demande_prestataire_statut' => $user->demande_prestataire_statut,
+            'demande_prestataire_description' => $user->demande_prestataire_description,
+            'demande_prestataire_localisation' => $user->demande_prestataire_localisation,
+            'demande_prestataire_telephone' => $user->demande_prestataire_telephone,
+            'demande_prestataire_date' => $user->demande_prestataire_date,
         ];
     }
 
@@ -108,15 +113,22 @@ class ProfileController extends Controller
 
         if ($user->role === 'administrateur') {
             return response()->json([
-                'message' => 'Un administrateur ne peut pas devenir prestataire.'
+                'message' => 'Un administrateur ne peut pas faire une demande prestataire.'
             ], 403);
         }
 
         if ($user->role === 'prestataire') {
             return response()->json([
                 'message' => 'Votre compte est déjà un compte prestataire.',
-                'data' => $user
+                'data' => $this->formatUser($user)
             ]);
+        }
+
+        if ($user->demande_prestataire_statut === 'en_attente') {
+            return response()->json([
+                'message' => 'Votre demande prestataire est déjà en attente de validation.',
+                'data' => $this->formatUser($user)
+            ], 422);
         }
 
         $validated = $request->validate([
@@ -126,15 +138,16 @@ class ProfileController extends Controller
         ]);
 
         $user->update([
-            'role' => 'prestataire',
-            'description_profil' => $validated['description_profil'],
-            'localisation' => $validated['localisation'],
-            'telephone' => $validated['telephone'] ?? $user->telephone,
-            'paiement_active' => false,
+            'demande_prestataire_statut' => 'en_attente',
+            'demande_prestataire_description' => $validated['description_profil'],
+            'demande_prestataire_localisation' => $validated['localisation'],
+            'demande_prestataire_telephone' => $validated['telephone'] ?? $user->telephone,
+            'demande_prestataire_date' => now(),
+            'demande_prestataire_decision_at' => null,
         ]);
 
         return response()->json([
-            'message' => 'Votre profil prestataire a été activé avec succès.',
+            'message' => 'Votre demande prestataire a été envoyée. Elle doit être validée par un administrateur.',
             'data' => $this->formatUser($user->fresh())
         ]);
     }

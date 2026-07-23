@@ -30,6 +30,12 @@ class User extends Authenticatable
         'photo_profil',
         'localisation',
         'paiement_active',
+        'demande_prestataire_statut',
+        'demande_prestataire_description',
+        'demande_prestataire_localisation',
+        'demande_prestataire_telephone',
+        'demande_prestataire_date',
+        'demande_prestataire_decision_at',
     ];
 
     /**
@@ -50,6 +56,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'paiement_active' => 'boolean',
+        'demande_prestataire_date' => 'datetime',
+        'demande_prestataire_decision_at' => 'datetime',
     ];
 
     protected $appends = [

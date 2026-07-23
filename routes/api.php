@@ -191,5 +191,7 @@ Route::prefix('v1')->group(function () {
 
         Route::get('/admin/paiements', [AdminController::class, 'paiements']);
         Route::patch('/admin/paiements/{id}/statut', [AdminController::class, 'modifierStatutPaiement']);
+        Route::patch('/admin/users/{id}/demande-prestataire/accepter', [AdminController::class, 'accepterDemandePrestataire']);
+        Route::patch('/admin/users/{id}/demande-prestataire/refuser', [AdminController::class, 'refuserDemandePrestataire']);
     });
 });

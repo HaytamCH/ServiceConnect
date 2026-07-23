@@ -126,6 +126,49 @@ async function updateUserStatus(user, statut) {
   }
 }
 
+async function acceptProviderRequest(user) {
+  updatingId.value = user.id
+  error.value = ''
+  success.value = ''
+
+  try {
+    const response = await api.patch(`/admin/users/${user.id}/demande-prestataire/accepter`)
+    Object.assign(user, response.data.data || {})
+    success.value = 'Demande prestataire acceptée.'
+  } catch (e) {
+    error.value = e.response?.data?.message || 'Impossible d’accepter cette demande.'
+  } finally {
+    updatingId.value = null
+  }
+}
+
+async function rejectProviderRequest(user) {
+  updatingId.value = user.id
+  error.value = ''
+  success.value = ''
+
+  try {
+    const response = await api.patch(`/admin/users/${user.id}/demande-prestataire/refuser`)
+    Object.assign(user, response.data.data || {})
+    success.value = 'Demande prestataire refusée.'
+  } catch (e) {
+    error.value = e.response?.data?.message || 'Impossible de refuser cette demande.'
+  } finally {
+    updatingId.value = null
+  }
+}
+
+function providerRequestLabel(statut) {
+  const labels = {
+    aucune: 'Aucune',
+    en_attente: 'En attente',
+    acceptee: 'Acceptée',
+    refusee: 'Refusée',
+  }
+
+  return labels[statut] || 'Aucune'
+}
+
 function formatDate(date) {
   if (!date) {
     return 'Date non définie'
@@ -230,6 +273,7 @@ function canEditStatus(user) {
             <th>Statut</th>
             <th>Localisation</th>
             <th>Date d’inscription</th>
+            <th>Demande prestataire</th>
             <th>Action admin</th>
           </tr>
           </thead>
@@ -258,6 +302,46 @@ function canEditStatus(user) {
             <td>{{ user.localisation || 'Non indiquée' }}</td>
 
             <td>{{ formatDate(user.created_at) }}</td>
+
+            <td>
+              <span
+                class="admin-badge status"
+                :class="user.demande_prestataire_statut || 'aucune'"
+              >
+                {{ providerRequestLabel(user.demande_prestataire_statut) }}
+              </span>
+
+              <div
+                v-if="user.demande_prestataire_statut === 'en_attente'"
+                class="admin-request-actions"
+              >
+                <small v-if="user.demande_prestataire_description">
+                  {{ user.demande_prestataire_description }}
+                </small>
+
+                <small v-if="user.demande_prestataire_localisation">
+                  📍 {{ user.demande_prestataire_localisation }}
+                </small>
+
+                <button
+                  type="button"
+                  class="primary-small-btn"
+                  :disabled="updatingId === user.id"
+                  @click="acceptProviderRequest(user)"
+                >
+                  Accepter
+                </button>
+
+                <button
+                  type="button"
+                  class="secondary-small-btn"
+                  :disabled="updatingId === user.id"
+                  @click="rejectProviderRequest(user)"
+                >
+                  Refuser
+                </button>
+              </div>
+            </td>
 
             <td>
               <select

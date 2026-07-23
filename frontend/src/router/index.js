@@ -417,6 +417,11 @@ router.beforeEach((to) => {
       },
     }
   }
+  if (to.path.startsWith('/prestataire') && user?.role !== 'prestataire') {
+    return {
+      path: '/mon-espace',
+    }
+  }
 
   if (to.meta.requiresAdmin && user?.role !== 'administrateur') {
     return {

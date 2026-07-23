@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Annonce;
 use App\Models\Avis;
+use App\Models\UserNotification;
 use App\Models\Categorie;
 use App\Models\Like;
 use App\Models\Message;
@@ -113,6 +114,12 @@ class AdminController extends Controller
                 'statut',
                 'localisation',
                 'created_at',
+                'demande_prestataire_statut',
+                'demande_prestataire_description',
+                'demande_prestataire_localisation',
+                'demande_prestataire_telephone',
+                'demande_prestataire_date',
+                'demande_prestataire_decision_at',
             ])
             ->when($search !== '', function ($query) use ($search) {
                 $searchLower =strtolower($search);
@@ -634,6 +641,99 @@ class AdminController extends Controller
         return response()->json([
             'message' => 'Statut du paiement mis à jour.',
             'data' => $paiement
+        ]);
+    }
+
+    public function accepterDemandePrestataire(Request $request, $id)
+    {
+        $verification = $this->verifierAdmin($request->user());
+
+        if ($verification) {
+            return $verification;
+        }
+
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Utilisateur introuvable.'
+            ], 404);
+        }
+
+        if ($user->demande_prestataire_statut !== 'en_attente') {
+            return response()->json([
+                'message' => 'Cet utilisateur n’a pas de demande prestataire en attente.'
+            ], 422);
+        }
+
+        $user->update([
+            'role' => 'prestataire',
+            'description_profil' => $user->demande_prestataire_description,
+            'localisation' => $user->demande_prestataire_localisation,
+            'telephone' => $user->demande_prestataire_telephone ?? $user->telephone,
+            'paiement_active' => false,
+            'demande_prestataire_statut' => 'acceptee',
+            'demande_prestataire_decision_at' => now(),
+        ]);
+
+        UserNotification::create([
+            'user_id' => $user->id,
+            'type' => 'demande_prestataire_acceptee',
+            'titre' => 'Demande prestataire acceptée',
+            'message' => 'Votre demande pour devenir prestataire a été acceptée.',
+            'lien' => '/prestataire/dashboard',
+            'related_type' => 'user',
+            'related_id' => $user->id,
+            'lu' => false,
+        ]);
+
+        return response()->json([
+            'message' => 'Demande prestataire acceptée.',
+            'data' => $user
+        ]);
+    }
+
+    public function refuserDemandePrestataire(Request $request, $id)
+    {
+        $verification = $this->verifierAdmin($request->user());
+
+        if ($verification) {
+            return $verification;
+        }
+
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Utilisateur introuvable.'
+            ], 404);
+        }
+
+        if ($user->demande_prestataire_statut !== 'en_attente') {
+            return response()->json([
+                'message' => 'Cet utilisateur n’a pas de demande prestataire en attente.'
+            ], 422);
+        }
+
+        $user->update([
+            'demande_prestataire_statut' => 'refusee',
+            'demande_prestataire_decision_at' => now(),
+        ]);
+
+        UserNotification::create([
+            'user_id' => $user->id,
+            'type' => 'demande_prestataire_refusee',
+            'titre' => 'Demande prestataire refusée',
+            'message' => 'Votre demande pour devenir prestataire a été refusée.',
+            'lien' => '/devenir-prestataire',
+            'related_type' => 'user',
+            'related_id' => $user->id,
+            'lu' => false,
+        ]);
+
+        return response()->json([
+            'message' => 'Demande prestataire refusée.',
+            'data' => $user
         ]);
     }
 

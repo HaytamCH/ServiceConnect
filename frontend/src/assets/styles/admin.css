@@ -572,3 +572,37 @@
     font-size: 28px;
   }
 }
+
+.admin-request-actions {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-request-actions small {
+  display: block;
+  color: #64748b;
+  line-height: 1.4;
+  max-width: 260px;
+}
+
+.admin-badge.en_attente {
+  background: #ffedd5;
+  color: #f97316;
+}
+
+.admin-badge.acceptee {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.admin-badge.refusee {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.admin-badge.aucune {
+  background: #e5e7eb;
+  color: #475569;
+}

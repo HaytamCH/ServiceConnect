@@ -23,6 +23,10 @@ const form = ref({
   telephone: auth.user?.telephone || '',
 })
 
+const demandeStatut = computed(() => auth.user?.demande_prestataire_statut || 'aucune')
+const hasPendingRequest = computed(() => demandeStatut.value === 'en_attente')
+const hasRejectedRequest = computed(() => demandeStatut.value === 'refusee')
+
 async function submitDevenirPrestataire() {
   loading.value = true
   error.value = ''
@@ -52,11 +56,8 @@ async function submitDevenirPrestataire() {
     auth.user = user
     localStorage.setItem('user', JSON.stringify(user))
 
-    success.value = language.t('becomeProvider.successActivated')
+    success.value = 'Votre demande a été envoyée. Elle doit être validée par un administrateur.'
 
-    setTimeout(() => {
-      router.push('/prestataire/dashboard')
-    }, 700)
   } catch (e) {
     error.value = e.response?.data?.message || language.t('becomeProvider.errorActivate')
   } finally {
@@ -111,8 +112,21 @@ async function submitDevenirPrestataire() {
           </RouterLink>
         </div>
 
+        <div v-else-if="hasPendingRequest" class="become-provider-panel">
+          <h2>Demande en attente</h2>
+
+          <p>
+            Votre demande pour devenir prestataire a bien été envoyée.
+            Elle doit maintenant être validée par un administrateur.
+          </p>
+
+          <RouterLink to="/mon-espace" class="secondary-small-btn">
+            Retour à mon espace
+          </RouterLink>
+        </div>
+
         <form
-          v-else-if="isMembre"
+          v-else-if="isMembre && !hasPendingRequest"
           class="become-provider-panel"
           @submit.prevent="submitDevenirPrestataire"
         >

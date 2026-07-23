@@ -29,6 +29,11 @@ class AuthController extends Controller
             'photo_profil' => $user->photo_profil,
             'photo_profil_url' => $user->photo_profil_url,
             'paiement_active' => $user->paiement_active,
+            'demande_prestataire_statut' => $user->demande_prestataire_statut,
+            'demande_prestataire_description' => $user->demande_prestataire_description,
+            'demande_prestataire_localisation' => $user->demande_prestataire_localisation,
+            'demande_prestataire_telephone' => $user->demande_prestataire_telephone,
+            'demande_prestataire_date' => $user->demande_prestataire_date,
         ];
     }
 
