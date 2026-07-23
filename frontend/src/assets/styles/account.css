@@ -188,3 +188,23 @@
     grid-template-columns: 1fr;
   }
 }
+
+.profile-edit-card {
+  max-width: 980px;
+  width: 100%;
+}
+
+.profile-photo-zone {
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .profile-edit-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profile-edit-header .secondary-small-btn {
+    width: auto;
+  }
+}
