@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import api from '../../api/axios'
 import { useLanguageStore } from '../../stores/language'
 import { annonceUrl } from '../../utils/slug'
@@ -11,6 +11,38 @@ const notifications = useNotificationStore()
 const paiements = ref([])
 const loading = ref(true)
 const error = ref('')
+
+const paiementsAcceptes = computed(() => {
+  return paiements.value.filter((paiement) => paiement.statut === 'accepte')
+})
+
+const paiementsEnAttente = computed(() => {
+  return paiements.value.filter((paiement) => paiement.statut === 'en_attente')
+})
+
+const paiementsRefuses = computed(() => {
+  return paiements.value.filter((paiement) => paiement.statut === 'refuse')
+})
+
+const totalPaye = computed(() => {
+  return paiementsAcceptes.value.reduce((total, paiement) => {
+    return total + Number(paiement.montant || 0)
+  }, 0)
+})
+
+function formatCurrency(value) {
+  const locale =
+    language.current === 'en'
+      ? 'en-BE'
+      : language.current === 'nl'
+        ? 'nl-BE'
+        : 'fr-BE'
+
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(Number(value || 0))
+}
 
 onMounted(async () => {
   await loadPaiements()
