@@ -114,19 +114,38 @@ class MessageController extends Controller
         $annonceId = $validated['annonce_id'] ?? ($reservation?->annonce_id ?? null);
 
         if ($annonceId) {
-            $annonce = Annonce::where('id', $annonceId)
-                ->where('statut', 'publiee')
-                ->first();
+            $annonce = Annonce::find($annonceId);
 
             if (!$annonce) {
+                return response()->json([
+                    'message' => 'Annonce introuvable.'
+                ], 404);
+            }
+
+            $expediteurEstPrestataireAnnonce =
+                (int) $annonce->prestataire_id === (int) $user->id;
+
+            $destinataireEstPrestataireAnnonce =
+                (int) $annonce->prestataire_id === (int) $validated['destinataire_id'];
+
+            if (
+                $annonce->statut !== 'publiee' &&
+                !$expediteurEstPrestataireAnnonce &&
+                $user->role !== 'administrateur'
+            ) {
                 return response()->json([
                     'message' => 'Cette annonce n’est plus disponible.'
                 ], 422);
             }
 
-            if ((int) $annonce->prestataire_id !== (int) $validated['destinataire_id']) {
+            if (
+                !$expediteurEstPrestataireAnnonce &&
+                !$destinataireEstPrestataireAnnonce &&
+                $user->role !== 'administrateur' &&
+                $destinataire->role !== 'administrateur'
+            ) {
                 return response()->json([
-                    'message' => 'Le destinataire ne correspond pas au prestataire de cette annonce.'
+                    'message' => 'Ce message doit concerner le prestataire de l’annonce.'
                 ], 422);
             }
         }

@@ -17,23 +17,56 @@ const loading = ref(true)
 const error = ref('')
 const success = ref('')
 
+const selectedRecipientName = ref('')
+const selectedAnnonceTitle = ref('')
+
 const isPrestataire = computed(() => auth.isPrestataire)
 const isMembre = computed(() => auth.isMembre)
 
-const showMessageForm = computed(() => {
-  return !!route.query.destinataire_id
-})
-
 const form = ref({
-  destinataire_id: route.query.destinataire_id || '',
-  annonce_id: route.query.annonce_id || '',
+  destinataire_id: '',
+  annonce_id: '',
   contenu: '',
 })
 
+const showMessageForm = computed(() => {
+  return !!form.value.destinataire_id
+})
+
 onMounted(async () => {
+  await initialiseMessageFormFromRoute()
   await loadMessages()
   await markMessagesAsRead()
 })
+
+async function initialiseMessageFormFromRoute() {
+  if (!auth.user && auth.token) {
+    try {
+      await auth.fetchUser()
+    } catch (e) {
+      console.warn('Utilisateur non rechargé.')
+    }
+  }
+
+  const destinataireId = String(route.query.destinataire_id || '')
+
+  if (!destinataireId) {
+    return
+  }
+
+  if (isSelfRecipient(destinataireId)) {
+    form.value.destinataire_id = ''
+    form.value.annonce_id = ''
+    selectedRecipientName.value = ''
+    selectedAnnonceTitle.value = ''
+    return
+  }
+
+  form.value.destinataire_id = destinataireId
+  form.value.annonce_id = String(route.query.annonce_id || '')
+  selectedRecipientName.value = String(route.query.destinataire_nom || '')
+  selectedAnnonceTitle.value = String(route.query.annonce_titre || '')
+}
 
 async function loadMessages() {
   loading.value = true
@@ -59,12 +92,61 @@ async function markMessagesAsRead() {
   }
 }
 
+function isSelfRecipient(id) {
+  return Number(id) === Number(auth.user?.id)
+}
+
+function getOtherPerson(message) {
+  const currentUserId = Number(auth.user?.id)
+
+  if (Number(message.expediteur_id) === currentUserId) {
+    return message.destinataire
+  }
+
+  if (Number(message.destinataire_id) === currentUserId) {
+    return message.expediteur
+  }
+
+  return null
+}
+
+function selectReplyRecipient(message) {
+  error.value = ''
+  success.value = ''
+
+  const otherPerson = getOtherPerson(message)
+
+  if (!otherPerson || isSelfRecipient(otherPerson.id)) {
+    error.value = 'Impossible de sélectionner ce destinataire.'
+    return
+  }
+
+  const annonce = getLinkedAnnonce(message)
+
+  form.value.destinataire_id = otherPerson.id
+  form.value.annonce_id = annonce?.id || ''
+  form.value.contenu = ''
+
+  selectedRecipientName.value = getPersonName(otherPerson)
+  selectedAnnonceTitle.value = annonce?.titre || ''
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth',
+  })
+}
+
 async function sendMessage() {
   error.value = ''
   success.value = ''
 
   if (!form.value.destinataire_id || !form.value.contenu.trim()) {
     error.value = language.t('messages.messageRequired')
+    return
+  }
+
+  if (isSelfRecipient(form.value.destinataire_id)) {
+    error.value = 'Vous ne pouvez pas vous envoyer un message à vous-même.'
     return
   }
 
@@ -219,6 +301,16 @@ function getAnnonceTitle(message) {
               <small v-else-if="getLinkedAnnonce(message)">
                 Annonce liée : {{ getAnnonceTitle(message) }} — indisponible actuellement
               </small>
+
+              <div class="message-actions">
+                <button
+                  type="button"
+                  class="secondary-small-btn"
+                  @click="selectReplyRecipient(message)"
+                >
+                  Répondre
+                </button>
+              </div>
             </div>
           </article>
         </div>
@@ -236,11 +328,11 @@ function getAnnonceTitle(message) {
           <span>{{ language.t('messages.messageTo') }}</span>
 
           <strong>
-            {{ route.query.destinataire_nom || language.t('messages.selectedProvider') }}
+            {{ selectedRecipientName || language.t('messages.selectedProvider') }}
           </strong>
 
-          <small v-if="route.query.annonce_titre">
-            {{ language.t('messages.about') }} : {{ route.query.annonce_titre }}
+          <small v-if="selectedAnnonceTitle">
+            {{ language.t('messages.about') }} : {{ selectedAnnonceTitle }}
           </small>
         </div>
 
