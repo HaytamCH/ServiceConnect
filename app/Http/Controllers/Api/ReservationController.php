@@ -382,4 +382,66 @@ class ReservationController extends Controller
             'data' => $reservation
         ]);
     }
+
+    public function refuserAlternative(Request $request, $id)
+    {
+        $user = $request->user();
+
+        if (!$this->peutReserver($user)) {
+            return response()->json([
+                'message' => 'Seuls les membres peuvent refuser une alternative.'
+            ], 403);
+        }
+
+        if ($user->statut !== 'actif') {
+            return response()->json([
+                'message' => 'Votre compte n’est pas actif.'
+            ], 403);
+        }
+
+        $reservation = Reservation::where('id', $id)
+            ->where('membre_id', $user->id)
+            ->first();
+
+        if (!$reservation) {
+            return response()->json([
+                'message' => 'Réservation introuvable ou accès interdit.'
+            ], 404);
+        }
+
+        if ($reservation->statut !== 'alternative_proposee') {
+            return response()->json([
+                'message' => 'Cette réservation ne contient pas d’alternative à refuser.'
+            ], 422);
+        }
+
+        $reservation->update([
+            'statut' => 'annulee',
+        ]);
+
+        UserNotification::create([
+            'user_id' => $reservation->prestataire_id,
+            'type' => 'reservation_alternative_refusee',
+            'titre' => 'Alternative refusée',
+            'message' => $user->prenom . ' ' . $user->nom . ' a refusé le nouveau créneau proposé.',
+            'lien' => '/prestataire/reservations',
+            'related_type' => 'reservation',
+            'related_id' => $reservation->id,
+            'lu' => false,
+        ]);
+
+        $reservation->load([
+            'annonce:id,titre,localisation,tarif',
+            'prestataire:id,nom,prenom,localisation',
+            'disponibilite:id,date_debut,date_fin,disponible',
+            'paiement:id,reservation_id,montant,devise,methode,statut,transaction_externe_id',
+            'avis:id,reservation_id,note,commentaire,visible,created_at'
+        ]);
+
+        return response()->json([
+            'message' => 'Alternative refusée. La réservation a été annulée.',
+            'data' => $reservation
+        ]);
+    }
+
 }

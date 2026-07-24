@@ -14,6 +14,7 @@ const error = ref('')
 const paymentError = ref('')
 const payingReservationId = ref(null)
 const acceptingAlternativeId = ref(null)
+const refusingAlternativeId = ref(null)
 
 const activeReviewReservationId = ref(null)
 const postingReviewId = ref(null)
@@ -40,6 +41,29 @@ async function acceptAlternative(reservation) {
     error.value = e.response?.data?.message || 'Impossible d’accepter cette alternative.'
   } finally {
     acceptingAlternativeId.value = null
+  }
+}
+
+async function rejectAlternative(reservation) {
+  const confirmation = confirm(
+    'Voulez-vous vraiment refuser cette alternative ? La réservation sera annulée.',
+  )
+
+  if (!confirmation) {
+    return
+  }
+
+  refusingAlternativeId.value = reservation.id
+  error.value = ''
+  paymentError.value = ''
+
+  try {
+    await api.patch(`/reservations/${reservation.id}/alternative/refuser`)
+    await loadReservations()
+  } catch (e) {
+    error.value = e.response?.data?.message || 'Impossible de refuser cette alternative.'
+  } finally {
+    refusingAlternativeId.value = null
   }
 }
 async function loadReservations() {
@@ -378,13 +402,33 @@ async function submitAvis(reservation) {
             v-if="reservation.statut === 'alternative_proposee'"
             type="button"
             class="primary-small-btn"
-            :disabled="acceptingAlternativeId === reservation.id"
+            :disabled="
+              acceptingAlternativeId === reservation.id ||
+              refusingAlternativeId === reservation.id
+            "
             @click="acceptAlternative(reservation)"
           >
             {{
               acceptingAlternativeId === reservation.id
                 ? 'Acceptation...'
                 : 'Accepter l’alternative'
+            }}
+          </button>
+
+          <button
+            v-if="reservation.statut === 'alternative_proposee'"
+            type="button"
+            class="danger-small-btn"
+            :disabled="
+              acceptingAlternativeId === reservation.id ||
+              refusingAlternativeId === reservation.id
+            "
+            @click="rejectAlternative(reservation)"
+          >
+            {{
+              refusingAlternativeId === reservation.id
+                ? 'Refus...'
+                : 'Refuser l’alternative'
             }}
           </button>
 

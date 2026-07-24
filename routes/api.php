@@ -163,6 +163,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/prestataire/dashboard', [PrestataireController::class, 'dashboard']);
         Route::get('/prestataire/paiements', [PaiementController::class, 'paiementsPrestataire']);
         Route::patch('/reservations/{id}/alternative/accepter', [ReservationController::class, 'accepterAlternative']);
+        Route::patch('/reservations/{id}/alternative/refuser', [ReservationController::class, 'refuserAlternative']);
 
         /*
         |--------------------------------------------------------------------------

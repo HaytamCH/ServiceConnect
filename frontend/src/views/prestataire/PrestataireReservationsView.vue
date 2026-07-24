@@ -46,6 +46,8 @@ async function loadReservations() {
 async function markProviderReservationNotificationsAsRead() {
   try {
     await api.patch('/notifications/mark-as-read?type=reservation_recue')
+    await api.patch('/notifications/mark-as-read?type=reservation_alternative_acceptee')
+    await api.patch('/notifications/mark-as-read?type=reservation_alternative_refusee')
     await notifications.loadSummary()
   } catch (e) {
     console.warn('Impossible de marquer les notifications de réservation reçue comme lues.')

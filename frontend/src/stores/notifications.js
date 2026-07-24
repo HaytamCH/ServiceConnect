@@ -21,6 +21,8 @@ const emptySummary = {
 
   reservations_prestataire: {
     en_attente: 0,
+    alternatives_acceptees: 0,
+    alternatives_refusees: 0,
   },
 
   annonces_prestataire: {
@@ -81,6 +83,12 @@ export const useNotificationStore = defineStore('notifications', {
 
     reservationsAlternatives: (state) =>
       state.summary?.reservations_membre?.alternatives || 0,
+
+    reservationsPrestataireAlternativesAcceptees: (state) =>
+      state.summary?.reservations_prestataire?.alternatives_acceptees || 0,
+
+    reservationsPrestataireAlternativesRefusees: (state) =>
+      state.summary?.reservations_prestataire?.alternatives_refusees || 0,
 
     reservationsTerminees: (state) =>
       state.summary?.reservations_membre?.terminees || 0,

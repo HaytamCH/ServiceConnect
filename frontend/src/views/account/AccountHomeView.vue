@@ -29,6 +29,8 @@ const visibleNotificationsCount = computed(() => {
   return (
     notifications.messagesNonLus +
     notifications.reservationsPrestataireEnAttente +
+    notifications.reservationsPrestataireAlternativesAcceptees +
+    notifications.reservationsPrestataireAlternativesRefusees +
     notifications.reservationsAcceptees +
     notifications.reservationsRefusees +
     notifications.reservationsAlternatives +
@@ -181,6 +183,26 @@ async function markNotificationTypeAsRead(type) {
             <span>🏁</span>
             <strong>{{ notifications.reservationsTerminees }}</strong>
             <p>réservation(s) terminée(s)</p>
+          </RouterLink>
+
+          <RouterLink
+            v-if="notifications.reservationsPrestataireAlternativesAcceptees > 0"
+            to="/prestataire/reservations"
+            class="notification-item"
+          >
+            <span>✅</span>
+            <strong>{{ notifications.reservationsPrestataireAlternativesAcceptees }}</strong>
+            <p>alternative(s) acceptée(s) par un membre</p>
+          </RouterLink>
+
+          <RouterLink
+            v-if="notifications.reservationsPrestataireAlternativesRefusees > 0"
+            to="/prestataire/reservations"
+            class="notification-item"
+          >
+            <span>❌</span>
+            <strong>{{ notifications.reservationsPrestataireAlternativesRefusees }}</strong>
+            <p>alternative(s) refusée(s) par un membre</p>
           </RouterLink>
 
           <RouterLink
