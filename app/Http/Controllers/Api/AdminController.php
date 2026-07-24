@@ -255,9 +255,24 @@ class AdminController extends Controller
             ], 404);
         }
 
+        $ancienStatut = $annonce->statut;
+
         $annonce->update([
             'statut' => $validated['statut'],
         ]);
+
+        if ($validated['statut'] === 'publiee' && $ancienStatut !== 'publiee') {
+            UserNotification::create([
+                'user_id' => $annonce->prestataire_id,
+                'type' => 'annonce_validee',
+                'titre' => 'Annonce validée',
+                'message' => 'Votre annonce "' . $annonce->titre . '" a été validée et publiée.',
+                'lien' => '/prestataire/annonces',
+                'related_type' => 'annonce',
+                'related_id' => $annonce->id,
+                'lu' => false,
+            ]);
+        }
 
         $annonce->load([
             'prestataire:id,nom,prenom,email,statut',

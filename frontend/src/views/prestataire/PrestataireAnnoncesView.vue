@@ -3,9 +3,10 @@ import { onMounted, ref } from 'vue'
 import api from '../../api/axios'
 import { useLanguageStore } from '../../stores/language'
 import { annonceUrl } from '../../utils/slug'
-
+import { useNotificationStore } from '../../stores/notifications'
 
 const language = useLanguageStore()
+const notifications = useNotificationStore()
 
 const annonces = ref([])
 const loading = ref(true)
@@ -14,8 +15,18 @@ const success = ref('')
 
 onMounted(async () => {
   await loadAnnonces()
+  await markAnnouncementNotificationsAsRead()
 })
 
+
+async function markAnnouncementNotificationsAsRead() {
+  try {
+    await api.patch('/notifications/mark-as-read?type=annonce_validee')
+    await notifications.loadSummary()
+  } catch {
+    console.warn('Impossible de marquer les notifications d’annonces comme lues.')
+  }
+}
 async function loadAnnonces() {
   loading.value = true
   error.value = ''
@@ -31,7 +42,7 @@ async function loadAnnonces() {
     } else {
       annonces.value = []
     }
-  } catch (e) {
+  } catch  {
     error.value = language.t('provider.announcementsLoadError')
   } finally {
     loading.value = false

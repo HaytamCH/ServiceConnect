@@ -23,6 +23,10 @@ const emptySummary = {
     en_attente: 0,
   },
 
+  annonces_prestataire: {
+    validees: 0,
+  },
+
   paiements: {
     acceptes: 0,
     refuses: 0,
@@ -84,6 +88,9 @@ export const useNotificationStore = defineStore('notifications', {
 
     adminAnnoncesEnAttente: (state) =>
       state.summary?.admin?.annonces_en_attente || 0,
+
+    annoncesValidees: (state) =>
+      state.summary?.annonces_prestataire?.validees || 0,
 
     adminAvisAModerer: (state) =>
       state.summary?.admin?.avis_a_moderer || 0,

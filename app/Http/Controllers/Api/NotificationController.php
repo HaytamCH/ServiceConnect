@@ -34,6 +34,10 @@ class NotificationController extends Controller
                     'en_attente' => (clone $nonLues)->where('type', 'reservation_recue')->count(),
                 ],
 
+                'annonces_prestataire' => [
+                    'validees' => (clone $nonLues)->where('type', 'annonce_validee')->count(),
+                ],
+
                 'paiements' => [
                     'acceptes' => (clone $nonLues)->where('type', 'paiement_accepte')->count(),
                     'refuses' => (clone $nonLues)->where('type', 'paiement_refuse')->count(),
