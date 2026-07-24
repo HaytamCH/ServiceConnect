@@ -18,11 +18,16 @@ class Reservation extends Model
         'date_service',
         'message_demande',
         'statut',
+        'date_alternative_debut',
+        'date_alternative_fin',
+        'message_alternative',
     ];
 
     protected $casts = [
         'date_demande' => 'datetime',
         'date_service' => 'datetime',
+        'date_alternative_debut' => 'datetime',
+        'date_alternative_fin' => 'datetime',
     ];
 
     public function membre()

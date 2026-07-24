@@ -739,3 +739,24 @@
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
+.alternative-form-box {
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid #bfdbfe;
+  border-radius: 16px;
+  background: #eff6ff;
+}
+
+.alternative-form-box h3 {
+  margin: 0 0 14px;
+  color: #0f172a;
+}
+
+.alternative-form-box textarea {
+  width: 100%;
+  border: 1px solid #dbe2ea;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-family: inherit;
+  resize: vertical;
+}

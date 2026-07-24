@@ -13,6 +13,7 @@ const loading = ref(true)
 const error = ref('')
 const paymentError = ref('')
 const payingReservationId = ref(null)
+const acceptingAlternativeId = ref(null)
 
 const activeReviewReservationId = ref(null)
 const postingReviewId = ref(null)
@@ -26,6 +27,21 @@ onMounted(async () => {
   await markReservationNotificationsAsRead()
 })
 
+
+async function acceptAlternative(reservation) {
+  acceptingAlternativeId.value = reservation.id
+  error.value = ''
+  paymentError.value = ''
+
+  try {
+    await api.patch(`/reservations/${reservation.id}/alternative/accepter`)
+    await loadReservations()
+  } catch (e) {
+    error.value = e.response?.data?.message || 'Impossible d’accepter cette alternative.'
+  } finally {
+    acceptingAlternativeId.value = null
+  }
+}
 async function loadReservations() {
   loading.value = true
   error.value = ''
@@ -272,6 +288,29 @@ async function submitAvis(reservation) {
             {{ reservation.message_demande }}
           </p>
 
+          <div
+            v-if="reservation.statut === 'alternative_proposee'"
+            class="reservation-alternative-box"
+          >
+            <strong>Nouveau créneau proposé</strong>
+
+            <p>
+              Le prestataire ne peut pas assurer le créneau initial et vous propose :
+            </p>
+
+            <p>
+              Du
+              <strong>{{ formatDate(reservation.date_alternative_debut) }}</strong>
+              au
+              <strong>{{ formatDate(reservation.date_alternative_fin) }}</strong>
+            </p>
+
+            <p v-if="reservation.message_alternative">
+              Message du prestataire :
+              {{ reservation.message_alternative }}
+            </p>
+          </div>
+
           <div v-if="hasAvis(reservation)" class="reservation-review-box">
             <strong>Votre avis : {{ getAvis(reservation).note }}/5 ⭐</strong>
             <p>
@@ -334,6 +373,21 @@ async function submitAvis(reservation) {
           <span class="status-badge" :class="reservation.statut">
             {{ statutLabel(reservation.statut) }}
           </span>
+
+          <button
+            v-if="reservation.statut === 'alternative_proposee'"
+            type="button"
+            class="primary-small-btn"
+            :disabled="acceptingAlternativeId === reservation.id"
+            @click="acceptAlternative(reservation)"
+          >
+            {{
+              acceptingAlternativeId === reservation.id
+                ? 'Acceptation...'
+                : 'Accepter l’alternative'
+            }}
+          </button>
+
 
           <span
             v-if="isReservationPaid(reservation)"

@@ -201,6 +201,9 @@ class ReservationController extends Controller
 
         $validated = $request->validate([
             'statut' => 'required|in:acceptee,refusee,alternative_proposee,terminee',
+            'date_alternative_debut' => 'required_if:statut,alternative_proposee|nullable|date|after:now',
+            'date_alternative_fin' => 'required_if:statut,alternative_proposee|nullable|date|after:date_alternative_debut',
+            'message_alternative' => 'nullable|string|max:1000',
         ]);
 
         $reservation = Reservation::with('paiement')
@@ -238,9 +241,17 @@ class ReservationController extends Controller
             }
         }
 
-        $reservation->update([
+        $updateData = [
             'statut' => $nouveauStatut,
-        ]);
+        ];
+
+        if ($nouveauStatut === 'alternative_proposee') {
+            $updateData['date_alternative_debut'] = $validated['date_alternative_debut'];
+            $updateData['date_alternative_fin'] = $validated['date_alternative_fin'];
+            $updateData['message_alternative'] = $validated['message_alternative'] ?? null;
+        }
+
+        $reservation->update($updateData);
 
         $notificationData = [
             'acceptee' => [
@@ -255,8 +266,8 @@ class ReservationController extends Controller
             ],
             'alternative_proposee' => [
                 'type' => 'reservation_alternative',
-                'titre' => 'Alternative proposée',
-                'message' => 'Une alternative a été proposée pour votre réservation.',
+                'titre' => 'Nouveau créneau proposé',
+                'message' => 'Le prestataire ne peut pas assurer le créneau initial et vous propose un nouveau créneau.',
             ],
             'terminee' => [
                 'type' => 'reservation_terminee',
@@ -281,7 +292,7 @@ class ReservationController extends Controller
         }
 
 
-        if ($nouveauStatut === 'refusee' && $reservation->disponibilite_id) {
+        if (in_array($nouveauStatut, ['refusee', 'alternative_proposee']) && $reservation->disponibilite_id) {
             $disponibilite = Disponibilite::find($reservation->disponibilite_id);
 
             if ($disponibilite) {
@@ -292,6 +303,82 @@ class ReservationController extends Controller
 
         return response()->json([
             'message' => 'Statut de la réservation mis à jour.',
+            'data' => $reservation
+        ]);
+    }
+
+    public function accepterAlternative(Request $request, $id)
+    {
+        $user = $request->user();
+
+        if (!$this->peutReserver($user)) {
+            return response()->json([
+                'message' => 'Seuls les membres peuvent accepter une alternative.'
+            ], 403);
+        }
+
+        if ($user->statut !== 'actif') {
+            return response()->json([
+                'message' => 'Votre compte n’est pas actif.'
+            ], 403);
+        }
+
+        $reservation = Reservation::where('id', $id)
+            ->where('membre_id', $user->id)
+            ->first();
+
+        if (!$reservation) {
+            return response()->json([
+                'message' => 'Réservation introuvable ou accès interdit.'
+            ], 404);
+        }
+
+        if ($reservation->statut !== 'alternative_proposee') {
+            return response()->json([
+                'message' => 'Cette réservation ne contient pas d’alternative à accepter.'
+            ], 422);
+        }
+
+        if (!$reservation->date_alternative_debut || !$reservation->date_alternative_fin) {
+            return response()->json([
+                'message' => 'Le créneau alternatif est incomplet.'
+            ], 422);
+        }
+
+        $disponibilite = Disponibilite::create([
+            'annonce_id' => $reservation->annonce_id,
+            'date_debut' => $reservation->date_alternative_debut,
+            'date_fin' => $reservation->date_alternative_fin,
+            'disponible' => false,
+        ]);
+
+        $reservation->update([
+            'statut' => 'acceptee',
+            'date_service' => $reservation->date_alternative_debut,
+            'disponibilite_id' => $disponibilite->id,
+        ]);
+
+        UserNotification::create([
+            'user_id' => $reservation->prestataire_id,
+            'type' => 'reservation_alternative_acceptee',
+            'titre' => 'Alternative acceptée',
+            'message' => $user->prenom . ' ' . $user->nom . ' a accepté le nouveau créneau proposé.',
+            'lien' => '/prestataire/reservations',
+            'related_type' => 'reservation',
+            'related_id' => $reservation->id,
+            'lu' => false,
+        ]);
+
+        $reservation->load([
+            'annonce:id,titre,localisation,tarif',
+            'prestataire:id,nom,prenom,localisation',
+            'disponibilite:id,date_debut,date_fin,disponible',
+            'paiement:id,reservation_id,montant,devise,methode,statut,transaction_externe_id',
+            'avis:id,reservation_id,note,commentaire,visible,created_at'
+        ]);
+
+        return response()->json([
+            'message' => 'Alternative acceptée. Vous pouvez maintenant procéder au paiement.',
             'data' => $reservation
         ]);
     }

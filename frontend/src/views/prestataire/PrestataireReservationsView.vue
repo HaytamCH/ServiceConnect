@@ -14,6 +14,8 @@ const loading = ref(true)
 const updating = ref(false)
 const error = ref('')
 const success = ref('')
+const activeAlternativeReservationId = ref(null)
+const alternativeForms = ref({})
 
 onMounted(async () => {
   await loadReservations()
@@ -64,6 +66,56 @@ async function updateStatut(reservationId, statut) {
     await loadReservations()
   } catch (e) {
     error.value = e.response?.data?.message || language.t('providerReservations.updateError')
+  } finally {
+    updating.value = false
+  }
+}
+
+function toggleAlternativeForm(reservation) {
+  error.value = ''
+  success.value = ''
+
+  if (activeAlternativeReservationId.value === reservation.id) {
+    activeAlternativeReservationId.value = null
+    return
+  }
+
+  activeAlternativeReservationId.value = reservation.id
+
+  if (!alternativeForms.value[reservation.id]) {
+    alternativeForms.value[reservation.id] = {
+      date_alternative_debut: '',
+      date_alternative_fin: '',
+      message_alternative: '',
+    }
+  }
+}
+
+async function submitAlternative(reservation) {
+  const form = alternativeForms.value[reservation.id]
+
+  if (!form?.date_alternative_debut || !form?.date_alternative_fin) {
+    error.value = 'Veuillez indiquer le début et la fin du nouveau créneau.'
+    return
+  }
+
+  updating.value = true
+  error.value = ''
+  success.value = ''
+
+  try {
+    await api.patch(`/prestataire/reservations/${reservation.id}/statut`, {
+      statut: 'alternative_proposee',
+      date_alternative_debut: form.date_alternative_debut,
+      date_alternative_fin: form.date_alternative_fin,
+      message_alternative: form.message_alternative?.trim() || null,
+    })
+
+    success.value = 'Une alternative a été proposée au membre.'
+    activeAlternativeReservationId.value = null
+    await loadReservations()
+  } catch (e) {
+    error.value = e.response?.data?.message || 'Impossible de proposer cette alternative.'
   } finally {
     updating.value = false
   }
@@ -182,6 +234,59 @@ function createdAtLabel(date) {
             {{ reservation.message_demande }}
           </p>
 
+          <div
+            v-if="activeAlternativeReservationId === reservation.id"
+            class="alternative-form-box"
+          >
+            <h3>Proposer un nouveau créneau</h3>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Début du nouveau créneau</label>
+                <input
+                  v-model="alternativeForms[reservation.id].date_alternative_debut"
+                  type="datetime-local"
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Fin du nouveau créneau</label>
+                <input
+                  v-model="alternativeForms[reservation.id].date_alternative_fin"
+                  type="datetime-local"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Message pour le membre</label>
+              <textarea
+                v-model="alternativeForms[reservation.id].message_alternative"
+                rows="3"
+                placeholder="Expliquez brièvement pourquoi vous proposez ce nouveau créneau."
+              ></textarea>
+            </div>
+
+            <div class="form-actions left">
+              <button
+                type="button"
+                class="primary-small-btn"
+                :disabled="updating"
+                @click="submitAlternative(reservation)"
+              >
+                Envoyer l’alternative
+              </button>
+
+              <button
+                type="button"
+                class="secondary-small-btn"
+                @click="toggleAlternativeForm(reservation)"
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
+
           <div class="prestataire-list-meta">
             <span v-if="reservation.annonce">
               🏷️ {{ reservation.annonce.categorie?.nom || language.t('providerReservations.service') }}
@@ -212,6 +317,16 @@ function createdAtLabel(date) {
             @click="updateStatut(reservation.id, 'refusee')"
           >
             {{ language.t('providerReservations.refuse') }}
+          </button>
+
+          <button
+            v-if="reservation.statut === 'en_attente'"
+            type="button"
+            class="secondary-small-btn"
+            :disabled="updating"
+            @click="toggleAlternativeForm(reservation)"
+          >
+            Proposer une alternative
           </button>
 
           <button
