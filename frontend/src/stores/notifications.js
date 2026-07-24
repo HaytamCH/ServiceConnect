@@ -43,6 +43,11 @@ const emptySummary = {
     refusees: 0,
   },
 
+  compte: {
+    desactive: 0,
+    reactive: 0,
+  },
+
   admin: {
     annonces_en_attente: 0,
     avis_a_moderer: 0,
@@ -109,6 +114,12 @@ export const useNotificationStore = defineStore('notifications', {
 
     demandesCategoriesRefusees: (state) =>
       state.summary?.demandes_categories?.refusees || 0,
+
+    compteDesactive: (state) =>
+      state.summary?.compte?.desactive || 0,
+
+    compteReactive: (state) =>
+      state.summary?.compte?.reactive || 0,
 
     adminAnnoncesEnAttente: (state) =>
       state.summary?.admin?.annonces_en_attente || 0,

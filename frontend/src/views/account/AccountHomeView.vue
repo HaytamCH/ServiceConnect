@@ -3,6 +3,7 @@ import { computed, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useLanguageStore } from '../../stores/language'
 import { useNotificationStore } from '../../stores/notifications'
+import api from '../../api/axios'
 
 const auth = useAuthStore()
 const language = useLanguageStore()
@@ -31,12 +32,16 @@ const visibleNotificationsCount = computed(() => {
     notifications.reservationsAcceptees +
     notifications.reservationsRefusees +
     notifications.reservationsAlternatives +
+    notifications.reservationsTerminees +
     notifications.annoncesValidees +
+    notifications.paiementsRecus +
     notifications.avisRecus +
     notifications.demandePrestataireAcceptee +
     notifications.demandePrestataireRefusee +
     notifications.demandesCategoriesAcceptees +
-    notifications.demandesCategoriesRefusees
+    notifications.demandesCategoriesRefusees+
+    notifications.compteDesactive +
+    notifications.compteReactive
   )
 })
 
@@ -61,6 +66,18 @@ function getRoleLabel(role) {
 
   return role || ''
 }
+
+async function markNotificationTypeAsRead(type) {
+  try {
+    await api.patch(`/notifications/mark-as-read?type=${type}`)
+    await notifications.loadSummary()
+  } catch (e) {
+    console.warn('Impossible de marquer cette notification comme lue.')
+  }
+}
+
+
+
 </script>
 
 <template>
@@ -107,6 +124,16 @@ function getRoleLabel(role) {
           </RouterLink>
 
           <RouterLink
+            v-if="notifications.paiementsRecus > 0"
+            to="/prestataire/paiements"
+            class="notification-item"
+          >
+            <span>💶</span>
+            <strong>{{ notifications.paiementsRecus }}</strong>
+            <p>paiement(s) reçu(s) pour vos prestations</p>
+          </RouterLink>
+
+          <RouterLink
             v-if="notifications.annoncesValidees > 0"
             to="/prestataire/annonces"
             class="notification-item"
@@ -147,6 +174,16 @@ function getRoleLabel(role) {
           </RouterLink>
 
           <RouterLink
+            v-if="notifications.reservationsTerminees > 0"
+            to="/mes-reservations"
+            class="notification-item"
+          >
+            <span>🏁</span>
+            <strong>{{ notifications.reservationsTerminees }}</strong>
+            <p>réservation(s) terminée(s)</p>
+          </RouterLink>
+
+          <RouterLink
             v-if="notifications.avisRecus > 0"
             to="/prestataire/avis"
             class="notification-item"
@@ -177,13 +214,35 @@ function getRoleLabel(role) {
           </RouterLink>
 
           <RouterLink
+            v-if="notifications.compteDesactive > 0"
+            to="/centre-aide"
+            class="notification-item"
+            @click="markNotificationTypeAsRead('compte_desactive')"
+          >
+            <span>🚫</span>
+            <strong>{{ notifications.compteDesactive }}</strong>
+            <p>votre compte a été désactivé. Veuillez contacter le service client ou l’administrateur</p>
+          </RouterLink>
+
+          <RouterLink
+            v-if="notifications.compteReactive > 0"
+            to="/mon-espace"
+            class="notification-item"
+            @click="markNotificationTypeAsRead('compte_reactive')"
+          >
+            <span>✅</span>
+            <strong>{{ notifications.compteReactive }}</strong>
+            <p>votre compte a été réactivé</p>
+          </RouterLink>
+
+          <RouterLink
             v-if="notifications.demandesCategoriesAcceptees > 0"
             to="/prestataire/annonces/nouvelle"
             class="notification-item"
           >
             <span>📂</span>
             <strong>{{ notifications.demandesCategoriesAcceptees }}</strong>
-            <p>catégorie proposée acceptée</p>
+            <p>votre demande de catégorie a été acceptée</p>
           </RouterLink>
 
           <RouterLink
@@ -193,7 +252,7 @@ function getRoleLabel(role) {
           >
             <span>❌</span>
             <strong>{{ notifications.demandesCategoriesRefusees }}</strong>
-            <p>catégorie proposée refusée</p>
+            <p>votre demande de catégorie a été refusée</p>
           </RouterLink>
 
           <template v-if="isAdmin">

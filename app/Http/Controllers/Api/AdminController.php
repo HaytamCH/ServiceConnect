@@ -195,6 +195,27 @@ class AdminController extends Controller
             ]);
         }
 
+        if ($validated['statut'] === 'actif' && $ancienStatut !== 'actif') {
+            UserNotification::where('user_id', $user->id)
+                ->where('type', 'compte_desactive')
+                ->where('lu', false)
+                ->update([
+                    'lu' => true,
+                    'read_at' => now(),
+                ]);
+
+            UserNotification::create([
+                'user_id' => $user->id,
+                'type' => 'compte_reactive',
+                'titre' => 'Compte réactivé',
+                'message' => 'Votre compte a été réactivé. Vous pouvez de nouveau utiliser ServiceConnect.',
+                'lien' => '/mon-espace',
+                'related_type' => 'user',
+                'related_id' => $user->id,
+                'lu' => false,
+            ]);
+        }
+
         return response()->json([
             'message' => 'Statut de l’utilisateur mis à jour.',
             'data' => [
