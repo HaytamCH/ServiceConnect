@@ -203,7 +203,8 @@ class ReservationController extends Controller
             'statut' => 'required|in:acceptee,refusee,alternative_proposee,terminee',
         ]);
 
-        $reservation = Reservation::where('id', $id)
+        $reservation = Reservation::with('paiement')
+            ->where('id', $id)
             ->where('prestataire_id', $user->id)
             ->first();
 
@@ -227,6 +228,12 @@ class ReservationController extends Controller
             if ($reservation->statut !== 'acceptee') {
                 return response()->json([
                     'message' => 'Seule une réservation acceptée peut être marquée comme terminée.'
+                ], 422);
+            }
+
+            if (!$reservation->paiement || $reservation->paiement->statut !== 'accepte') {
+                return response()->json([
+                    'message' => 'La réservation peut être marquée comme terminée uniquement après confirmation du paiement.'
                 ], 422);
             }
         }

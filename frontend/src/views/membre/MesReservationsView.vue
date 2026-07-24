@@ -144,7 +144,11 @@ function getAvis(reservation) {
 }
 
 function canLeaveAvis(reservation) {
-  return ['acceptee', 'terminee'].includes(reservation.statut) && !hasAvis(reservation)
+  return (
+    reservation.statut === 'terminee' &&
+    isReservationPaid(reservation) &&
+    !hasAvis(reservation)
+  )
 }
 
 function toggleReviewForm(reservation) {

@@ -62,7 +62,10 @@ class AvisController extends Controller
             'commentaire' => 'nullable|string|max:1500',
         ]);
 
-        $reservation = Reservation::with('annonce')
+        $reservation = Reservation::with([
+            'annonce',
+            'paiement'
+        ])
             ->find($validated['reservation_id']);
 
         if (!$reservation) {
@@ -77,9 +80,15 @@ class AvisController extends Controller
             ], 403);
         }
 
-        if (!in_array($reservation->statut, ['acceptee', 'terminee'])) {
+        if ($reservation->statut !== 'terminee') {
             return response()->json([
-                'message' => 'Un avis ne peut être laissé que pour une réservation acceptée ou terminée.'
+                'message' => 'Vous pouvez laisser un avis uniquement lorsque la prestation est terminée.'
+            ], 422);
+        }
+
+        if (!$reservation->paiement || $reservation->paiement->statut !== 'accepte') {
+            return response()->json([
+                'message' => 'Vous pouvez laisser un avis uniquement après confirmation du paiement.'
             ], 422);
         }
 
