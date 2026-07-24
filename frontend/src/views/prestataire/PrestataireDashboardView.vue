@@ -16,7 +16,7 @@ const user = computed(() => auth.user)
 
 const notifications = useNotificationStore()
 
-oonMounted(async () => {
+onMounted(async () => {
   await loadDashboard()
   await markProviderAcceptedNotificationAsRead()
 })

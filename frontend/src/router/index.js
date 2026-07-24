@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/public/HomeView.vue'
+import { useAuthStore } from '../stores/auth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -394,20 +395,9 @@ router.afterEach((to) => {
     )
   }
 })
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
+  const auth = useAuthStore()
   const token = localStorage.getItem('token')
-  const storedUser = localStorage.getItem('user')
-
-  let user = null
-
-  if (storedUser) {
-    try {
-      user = JSON.parse(storedUser)
-    } catch (e) {
-      user = null
-      localStorage.removeItem('user')
-    }
-  }
 
   if (to.meta.requiresAuth && !token) {
     return {
@@ -417,7 +407,25 @@ router.beforeEach((to) => {
       },
     }
   }
-  if (to.path.startsWith('/prestataire') && user?.role !== 'prestataire') {
+
+  let user = auth.user
+
+  if (token && (to.path.startsWith('/prestataire/') || to.meta.requiresAdmin)) {
+    try {
+      user = await auth.fetchUser()
+    } catch (e) {
+      await auth.logout()
+
+      return {
+        path: '/login',
+        query: {
+          redirect: to.fullPath,
+        },
+      }
+    }
+  }
+
+  if (to.path.startsWith('/prestataire/') && user?.role !== 'prestataire') {
     return {
       path: '/mon-espace',
     }
