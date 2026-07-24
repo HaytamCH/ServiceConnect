@@ -2,7 +2,6 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../api/axios'
-import serviceImage from '../../assets/images/handyman-service.webp'
 import { useAuthStore } from '../../stores/auth'
 import { useLanguageStore } from '../../stores/language'
 import { extractIdFromSlug, prestataireUrl } from '../../utils/slug'
@@ -54,6 +53,9 @@ const backLink = computed(() => {
       query,
     }
   }
+  if (route.query.retour === 'profil' && route.query.prestataire_retour) {
+    return String(route.query.prestataire_retour)
+  }
 
   return '/annonces'
 })
@@ -65,6 +67,10 @@ const backLabel = computed(() => {
 
   if (route.query.retour === 'admin') {
     return 'Retour à la gestion des annonces'
+  }
+
+  if (route.query.retour === 'profil') {
+    return 'Retour au profil prestataire'
   }
 
   return language.t('common.backToServices')
@@ -343,7 +349,7 @@ function renderStars(note) {
     <div v-if="annonce" class="detail-layout">
       <main class="detail-card">
         <div class="detail-main">
-          <img class="detail-image" :src="serviceImage" :alt="annonce.titre" />
+
 
           <div class="detail-info">
             <span class="service-badge">
@@ -537,7 +543,13 @@ function renderStars(note) {
 
         <RouterLink
           v-if="annonce.prestataire"
-          :to="prestataireUrl(annonce.prestataire)"
+          :to="{
+            path: prestataireUrl(annonce.prestataire),
+            query: {
+              retour: 'annonce',
+              annonce_retour: route.fullPath
+            }
+          }"
           class="provider-profile-link"
         >
           {{ language.t('search.viewProfile') }}

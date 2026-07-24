@@ -42,6 +42,22 @@ function getProfilePhotoUrl(user) {
   return user?.photo_profil_url || ''
 }
 
+function backLinkText() {
+  if (route.query.retour === 'annonce') {
+    return '← Retour à l’annonce'
+  }
+
+  return '← Retour aux services'
+}
+
+function backLinkTarget() {
+  if (route.query.retour === 'annonce' && route.query.annonce_retour) {
+    return String(route.query.annonce_retour)
+  }
+
+  return '/annonces'
+}
+
 function extractArray(response) {
   return response.data.data || []
 }
@@ -119,8 +135,8 @@ async function toggleProviderFavorite() {
 
 <template>
   <section class="provider-page">
-    <RouterLink to="/annonces" class="back-link">
-      ← Retour aux services
+    <RouterLink :to="backLinkTarget()" class="back-link">
+      {{ backLinkText() }}
     </RouterLink>
 
     <p v-if="loading">Chargement du profil...</p>
@@ -170,7 +186,13 @@ async function toggleProviderFavorite() {
             <RouterLink
               v-for="annonce in prestataire.annonces"
               :key="annonce.id"
-              :to="annonceUrl(annonce)"
+              :to="{
+                    path: annonceUrl(annonce),
+                    query: {
+                      retour: 'profil',
+                      prestataire_retour: route.fullPath
+                    }
+                  }"
               class="provider-service-item"
             >
               <div class="service-icon">🛠️</div>
