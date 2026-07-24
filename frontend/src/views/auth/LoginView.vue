@@ -18,6 +18,16 @@ const loading = ref(false)
 const error = ref('')
 const showPassword = ref(false)
 
+const disabledMessage = localStorage.getItem('account_disabled_message')
+
+if (disabledMessage) {
+  error.value = disabledMessage
+  localStorage.removeItem('account_disabled_message')
+} else if (route.query.account_disabled) {
+  error.value =
+    'Votre compte a été désactivé. Veuillez contacter le service client ou l’administrateur pour plus d’informations.'
+}
+
 async function submitLogin() {
   loading.value = true
   error.value = ''

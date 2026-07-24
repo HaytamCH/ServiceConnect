@@ -414,7 +414,18 @@ router.beforeEach(async (to) => {
     try {
       user = await auth.fetchUser()
     } catch (e) {
+      const message = e.response?.data?.message || ''
+
       await auth.logout()
+
+      if (message.includes('Votre compte a été désactivé')) {
+        return {
+          path: '/login',
+          query: {
+            account_disabled: '1',
+          },
+        }
+      }
 
       return {
         path: '/login',

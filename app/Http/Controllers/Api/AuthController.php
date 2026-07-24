@@ -170,7 +170,7 @@ class AuthController extends Controller
 
         if ($user->statut !== 'actif') {
             return response()->json([
-                'message' => 'Ce compte n’est pas actif.'
+                'message' => 'Votre compte a été désactivé. Veuillez contacter le service client ou l’administrateur pour plus d’informations.'
             ], 403);
         }
 
@@ -186,6 +186,14 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         $user = $request->user();
+
+        if ($user->statut !== 'actif') {
+            $user->tokens()->delete();
+
+            return response()->json([
+                'message' => 'Votre compte a été désactivé. Veuillez contacter le service client ou l’administrateur pour plus d’informations.'
+            ], 403);
+        }
 
         return response()->json([
             'data' => $this->formatUser($user)

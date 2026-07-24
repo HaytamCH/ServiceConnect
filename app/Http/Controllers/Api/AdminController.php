@@ -157,7 +157,7 @@ class AdminController extends Controller
         }
 
         $validated = $request->validate([
-            'statut' => 'required|in:actif,desactive,suspendu',
+            'statut' => 'required|in:actif,desactive',
         ]);
 
         $user = User::find($id);
@@ -174,9 +174,26 @@ class AdminController extends Controller
             ], 422);
         }
 
+        $ancienStatut = $user->statut;
+
         $user->update([
             'statut' => $validated['statut'],
         ]);
+
+        if ($validated['statut'] === 'desactive' && $ancienStatut !== 'desactive') {
+            $user->tokens()->delete();
+
+            UserNotification::create([
+                'user_id' => $user->id,
+                'type' => 'compte_desactive',
+                'titre' => 'Compte désactivé',
+                'message' => 'Votre compte a été désactivé. Veuillez contacter le service client ou l’administrateur pour plus d’informations.',
+                'lien' => '/login',
+                'related_type' => 'user',
+                'related_id' => $user->id,
+                'lu' => false,
+            ]);
+        }
 
         return response()->json([
             'message' => 'Statut de l’utilisateur mis à jour.',

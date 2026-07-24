@@ -203,7 +203,6 @@ function roleLabel(role) {
 function statusLabel(statut) {
   const labels = {
     actif: 'Actif',
-    suspendu: 'Suspendu',
     desactive: 'Désactivé',
   }
 
@@ -360,7 +359,6 @@ function canEditStatus(user) {
                 @change="updateUserStatus(user, $event.target.value)"
               >
                 <option value="actif">Actif</option>
-                <option value="suspendu">Suspendu</option>
                 <option value="desactive">Désactivé</option>
               </select>
               <RouterLink
