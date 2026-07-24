@@ -167,15 +167,27 @@ async function rejectProviderRequest(user) {
   }
 }
 
-function providerRequestLabel(statut) {
+function providerRequestLabel(user) {
+  if (user.role === 'prestataire') {
+    return 'Déjà prestataire'
+  }
+
   const labels = {
     aucune: 'Aucune',
     en_attente: 'En attente',
-    acceptee: 'Acceptée',
+    acceptee: 'Validée',
     refusee: 'Refusée',
   }
 
-  return labels[statut] || 'Aucune'
+  return labels[user.demande_prestataire_statut] || 'Aucune'
+}
+
+function providerRequestClass(user) {
+  if (user.role === 'prestataire') {
+    return 'acceptee'
+  }
+
+  return user.demande_prestataire_statut || 'aucune'
 }
 
 function formatDate(date) {
@@ -314,13 +326,13 @@ function canEditStatus(user) {
             <td>
               <span
                 class="admin-badge status"
-                :class="user.demande_prestataire_statut || 'aucune'"
+                :class="providerRequestClass(user)"
               >
-                {{ providerRequestLabel(user.demande_prestataire_statut) }}
+              {{ providerRequestLabel(user) }}
               </span>
 
               <div
-                v-if="['en_attente', 'refusee'].includes(user.demande_prestataire_statut)"
+                v-if="user.role !== 'prestataire' && ['en_attente', 'refusee'].includes(user.demande_prestataire_statut)"
                 class="admin-request-actions"
               >
                 <small v-if="user.demande_prestataire_description">
