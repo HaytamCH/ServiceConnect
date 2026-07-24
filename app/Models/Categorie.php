@@ -22,4 +22,10 @@ class Categorie extends Model
     public function annonces(){
         return $this->hasMany(Annonce::class,'categorie_id');
     }
+
+    public function demandesCategories()
+    {
+        return $this->hasMany(DemandeCategorie::class, 'categorie_id');
+    }
+
 }

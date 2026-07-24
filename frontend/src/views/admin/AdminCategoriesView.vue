@@ -1,12 +1,19 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import api from '../../api/axios'
+import { useNotificationStore } from '../../stores/notifications'
+
+const notifications = useNotificationStore()
 
 const categories = ref([])
+const demandesCategories = ref([])
+
 const loading = ref(true)
 const saving = ref(false)
 const editingId = ref(null)
 const deletingId = ref(null)
+const requestActionId = ref(null)
+
 const error = ref('')
 const success = ref('')
 
@@ -23,20 +30,40 @@ const editForm = ref({
 })
 
 onMounted(async () => {
-  await loadCategories()
+  await loadPageData()
+  await markCategoryRequestNotificationsAsRead()
 })
 
-async function loadCategories() {
+async function loadPageData() {
   loading.value = true
   error.value = ''
 
   try {
-    const response = await api.get('/admin/categories')
-    categories.value = response.data.data || response.data || []
+    const [categoriesResponse, demandesResponse] = await Promise.all([
+      api.get('/admin/categories'),
+      api.get('/admin/demandes-categories'),
+    ])
+
+    categories.value = categoriesResponse.data.data || categoriesResponse.data || []
+    demandesCategories.value = demandesResponse.data.data || demandesResponse.data || []
   } catch (e) {
     error.value = e.response?.data?.message || 'Impossible de charger les catégories.'
   } finally {
     loading.value = false
+  }
+}
+
+async function loadCategories() {
+  const response = await api.get('/admin/categories')
+  categories.value = response.data.data || response.data || []
+}
+
+async function markCategoryRequestNotificationsAsRead() {
+  try {
+    await api.patch('/notifications/mark-as-read?type=admin_demande_categorie')
+    await notifications.loadSummary()
+  } catch (e) {
+    console.warn('Impossible de marquer les notifications de catégories comme lues.')
   }
 }
 
@@ -166,8 +193,78 @@ async function deleteCategory(categorie) {
   }
 }
 
+async function acceptCategoryRequest(demande) {
+  requestActionId.value = demande.id
+  error.value = ''
+  success.value = ''
+
+  try {
+    const response = await api.patch(`/admin/demandes-categories/${demande.id}/accepter`)
+
+    success.value = response.data.message || 'Demande de catégorie acceptée.'
+
+    await loadPageData()
+  } catch (e) {
+    error.value = e.response?.data?.message || 'Impossible d’accepter cette demande.'
+  } finally {
+    requestActionId.value = null
+  }
+}
+
+async function refuseCategoryRequest(demande) {
+  const motif = prompt('Motif du refus facultatif :')
+
+  if (motif === null) {
+    return
+  }
+
+  requestActionId.value = demande.id
+  error.value = ''
+  success.value = ''
+
+  try {
+    const response = await api.patch(`/admin/demandes-categories/${demande.id}/refuser`, {
+      motif_refus: motif.trim() || null,
+    })
+
+    success.value = response.data.message || 'Demande de catégorie refusée.'
+
+    await loadPageData()
+  } catch (e) {
+    error.value = e.response?.data?.message || 'Impossible de refuser cette demande.'
+  } finally {
+    requestActionId.value = null
+  }
+}
+
+function getPrestataireName(prestataire) {
+  if (!prestataire) {
+    return 'Prestataire'
+  }
+
+  return `${prestataire.prenom || ''} ${prestataire.nom || ''}`.trim()
+}
+
 function statusLabel(active) {
   return active ? 'Active' : 'Désactivée'
+}
+
+function demandeStatusLabel(statut) {
+  const labels = {
+    en_attente: 'En attente',
+    acceptee: 'Acceptée',
+    refusee: 'Refusée',
+  }
+
+  return labels[statut] || statut
+}
+
+function formatDate(date) {
+  if (!date) {
+    return 'Date non définie'
+  }
+
+  return new Date(date).toLocaleDateString('fr-BE')
 }
 </script>
 
@@ -189,12 +286,90 @@ function statusLabel(active) {
     <p v-if="error" class="error-message">{{ error }}</p>
     <p v-if="success" class="success-message">{{ success }}</p>
 
+    <section v-if="!loading" class="admin-panel category-requests-panel">
+      <div class="admin-panel-header">
+        <div>
+          <h2>Demandes de nouvelles catégories</h2>
+          <p>
+            {{ demandesCategories.length }} demande(s) proposée(s) par les prestataires.
+          </p>
+        </div>
+      </div>
+
+      <div v-if="demandesCategories.length" class="admin-category-request-list">
+        <article
+          v-for="demande in demandesCategories"
+          :key="demande.id"
+          class="admin-category-request-card"
+        >
+          <div>
+            <div class="admin-category-request-title">
+              <h3>{{ demande.nom }}</h3>
+
+              <span class="admin-badge status" :class="demande.statut">
+                {{ demandeStatusLabel(demande.statut) }}
+              </span>
+            </div>
+
+            <p>
+              {{ demande.description || 'Aucune description fournie.' }}
+            </p>
+
+            <small>
+              Proposée par
+              <strong>{{ getPrestataireName(demande.prestataire) }}</strong>
+              le {{ formatDate(demande.created_at) }}
+            </small>
+
+            <small v-if="demande.categorie">
+              Catégorie créée : <strong>{{ demande.categorie.nom }}</strong>
+            </small>
+
+            <small v-if="demande.motif_refus">
+              Motif du refus : {{ demande.motif_refus }}
+            </small>
+          </div>
+
+          <div class="admin-category-actions">
+            <button
+              v-if="demande.statut !== 'acceptee'"
+              type="button"
+              class="primary-small-btn"
+              :disabled="requestActionId === demande.id"
+              @click="acceptCategoryRequest(demande)"
+            >
+              {{
+                requestActionId === demande.id
+                  ? 'Traitement...'
+                  : 'Accepter'
+              }}
+            </button>
+
+            <button
+              v-if="demande.statut === 'en_attente'"
+              type="button"
+              class="danger-small-btn"
+              :disabled="requestActionId === demande.id"
+              @click="refuseCategoryRequest(demande)"
+            >
+              Refuser
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <div v-else class="empty-results">
+        <h2>Aucune demande de catégorie</h2>
+        <p>Aucun prestataire n’a proposé de nouvelle catégorie pour le moment.</p>
+      </div>
+    </section>
+
     <div v-if="!loading" class="admin-two-columns">
       <form class="admin-panel" @submit.prevent="createCategory">
         <div class="admin-panel-header">
           <div>
             <h2>Nouvelle catégorie</h2>
-            <p>Ajoutez une catégorie de service.</p>
+            <p>Ajoutez une catégorie de service manuellement.</p>
           </div>
         </div>
 

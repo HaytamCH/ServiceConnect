@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\PaiementController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\DemandeCategorieController;
 
 /*
 |--------------------------------------------------------------------------
@@ -133,6 +134,12 @@ Route::prefix('v1')->group(function () {
         Route::put('/prestataire/annonces/{id}', [AnnonceController::class, 'update']);
         Route::delete('/prestataire/annonces/{id}', [AnnonceController::class, 'destroy']);
 
+
+        Route::post('/prestataire/demandes-categories', [DemandeCategorieController::class, 'store']);
+
+        Route::get('/admin/demandes-categories', [DemandeCategorieController::class, 'adminIndex']);
+        Route::patch('/admin/demandes-categories/{id}/accepter', [DemandeCategorieController::class, 'accepter']);
+        Route::patch('/admin/demandes-categories/{id}/refuser', [DemandeCategorieController::class, 'refuser']);
         /*
         |--------------------------------------------------------------------------
         | Espace prestataire - disponibilités

@@ -38,18 +38,27 @@ const emptySummary = {
     refusee: 0,
   },
 
+  demandes_categories: {
+    acceptees: 0,
+    refusees: 0,
+  },
+
   admin: {
     annonces_en_attente: 0,
     avis_a_moderer: 0,
     messages_a_surveiller: 0,
     demandes_prestataires: 0,
+    categories_a_valider: 0,
   },
+}
 
+function cloneEmptySummary() {
+  return JSON.parse(JSON.stringify(emptySummary))
 }
 
 export const useNotificationStore = defineStore('notifications', {
   state: () => ({
-    summary: { ...emptySummary },
+    summary: cloneEmptySummary(),
     loading: false,
     error: '',
   }),
@@ -74,6 +83,9 @@ export const useNotificationStore = defineStore('notifications', {
     reservationsPrestataireEnAttente: (state) =>
       state.summary?.reservations_prestataire?.en_attente || 0,
 
+    annoncesValidees: (state) =>
+      state.summary?.annonces_prestataire?.validees || 0,
+
     paiementsAcceptes: (state) =>
       state.summary?.paiements?.acceptes || 0,
 
@@ -86,11 +98,20 @@ export const useNotificationStore = defineStore('notifications', {
     avisRecus: (state) =>
       state.summary?.avis_prestataire?.recus || 0,
 
+    demandePrestataireAcceptee: (state) =>
+      state.summary?.demande_prestataire?.acceptee || 0,
+
+    demandePrestataireRefusee: (state) =>
+      state.summary?.demande_prestataire?.refusee || 0,
+
+    demandesCategoriesAcceptees: (state) =>
+      state.summary?.demandes_categories?.acceptees || 0,
+
+    demandesCategoriesRefusees: (state) =>
+      state.summary?.demandes_categories?.refusees || 0,
+
     adminAnnoncesEnAttente: (state) =>
       state.summary?.admin?.annonces_en_attente || 0,
-
-    annoncesValidees: (state) =>
-      state.summary?.annonces_prestataire?.validees || 0,
 
     adminAvisAModerer: (state) =>
       state.summary?.admin?.avis_a_moderer || 0,
@@ -98,14 +119,11 @@ export const useNotificationStore = defineStore('notifications', {
     adminMessagesASurveiller: (state) =>
       state.summary?.admin?.messages_a_surveiller || 0,
 
-    demandePrestataireAcceptee: (state) =>
-      state.summary?.demande_prestataire?.acceptee || 0,
-
-    demandePrestataireRefusee: (state) =>
-      state.summary?.demande_prestataire?.refusee || 0,
-
     adminDemandesPrestataires: (state) =>
       state.summary?.admin?.demandes_prestataires || 0,
+
+    adminCategoriesAValider: (state) =>
+      state.summary?.admin?.categories_a_valider || 0,
   },
 
   actions: {
@@ -124,7 +142,7 @@ export const useNotificationStore = defineStore('notifications', {
     },
 
     clear() {
-      this.summary = { ...emptySummary }
+      this.summary = cloneEmptySummary()
       this.error = ''
     },
   },

@@ -611,3 +611,72 @@
   margin-top: 8px;
   display: inline-flex;
 }
+/* =========================
+   DEMANDES DE CATEGORIES
+========================= */
+
+.category-requests-panel {
+  margin-bottom: 24px;
+}
+
+.admin-category-request-list {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-category-request-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 18px;
+  background: #ffffff;
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 18px;
+  align-items: center;
+}
+
+.admin-category-request-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.admin-category-request-title h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 20px;
+}
+
+.admin-category-request-card p {
+  margin: 0 0 10px;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.admin-category-request-card small {
+  display: block;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.admin-badge.status.en_attente {
+  background: #ffedd5;
+  color: #f97316;
+}
+
+.admin-badge.status.acceptee {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.admin-badge.status.refusee {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+@media (max-width: 900px) {
+  .admin-category-request-card {
+    grid-template-columns: 1fr;
+  }
+}

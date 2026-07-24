@@ -20,7 +20,8 @@ const visibleNotificationsCount = computed(() => {
       notifications.adminAnnoncesEnAttente +
       notifications.adminAvisAModerer +
       notifications.adminMessagesASurveiller +
-      notifications.adminDemandesPrestataires
+      notifications.adminDemandesPrestataires +
+      notifications.adminCategoriesAValider
     )
   }
 
@@ -33,7 +34,9 @@ const visibleNotificationsCount = computed(() => {
     notifications.annoncesValidees +
     notifications.avisRecus +
     notifications.demandePrestataireAcceptee +
-    notifications.demandePrestataireRefusee
+    notifications.demandePrestataireRefusee +
+    notifications.demandesCategoriesAcceptees +
+    notifications.demandesCategoriesRefusees
   )
 })
 
@@ -173,7 +176,37 @@ function getRoleLabel(role) {
             <p>demande prestataire refusée</p>
           </RouterLink>
 
+          <RouterLink
+            v-if="notifications.demandesCategoriesAcceptees > 0"
+            to="/prestataire/annonces/nouvelle"
+            class="notification-item"
+          >
+            <span>📂</span>
+            <strong>{{ notifications.demandesCategoriesAcceptees }}</strong>
+            <p>catégorie proposée acceptée</p>
+          </RouterLink>
+
+          <RouterLink
+            v-if="notifications.demandesCategoriesRefusees > 0"
+            to="/prestataire/annonces/nouvelle"
+            class="notification-item"
+          >
+            <span>❌</span>
+            <strong>{{ notifications.demandesCategoriesRefusees }}</strong>
+            <p>catégorie proposée refusée</p>
+          </RouterLink>
+
           <template v-if="isAdmin">
+            <RouterLink
+              v-if="notifications.adminCategoriesAValider > 0"
+              to="/admin/categories"
+              class="notification-item"
+            >
+              <span>📂</span>
+              <strong>{{ notifications.adminCategoriesAValider }}</strong>
+              <p>demande(s) de catégorie à valider</p>
+            </RouterLink>
+
             <RouterLink
               v-if="notifications.adminDemandesPrestataires > 0"
               to="/admin/users"

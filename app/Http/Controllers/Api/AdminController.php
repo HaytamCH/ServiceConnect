@@ -12,6 +12,7 @@ use App\Models\Message;
 use App\Models\Paiement;
 use App\Models\Reservation;
 use App\Models\User;
+use App\Models\DemandeCategorie;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -73,6 +74,7 @@ class AdminController extends Controller
             'nombre_annonces_en_attente' => Annonce::where('statut', 'en_attente')->count(),
             'nombre_annonces_publiees' => Annonce::where('statut', 'publiee')->count(),
             'nombre_annonces_suspendues' => Annonce::where('statut', 'suspendue')->count(),
+            'nombre_demandes_categories_en_attente' => DemandeCategorie::where('statut', 'en_attente')->count(),
 
             'nombre_reservations' => Reservation::count(),
             'nombre_messages' => Message::count(),
