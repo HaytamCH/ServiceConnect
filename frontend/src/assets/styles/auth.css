@@ -1,5 +1,6 @@
 .auth-page {
-  min-height: calc(100vh - 84px - 74px);
+  flex: 1;
+  min-height: 0;
   background: #f8fafc;
   display: flex;
   align-items: center;
