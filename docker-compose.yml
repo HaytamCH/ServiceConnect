@@ -1,0 +1,43 @@
+services:
+    mysql:
+        image: mysql:8.0
+        container_name: serviceconnect_mysql
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: serviceconnect
+            MYSQL_ROOT_PASSWORD: root_password_change_me
+            MYSQL_USER: serviceconnect_user
+            MYSQL_PASSWORD: serviceconnect_password_change_me
+        volumes:
+            - mysql_data:/var/lib/mysql
+        ports:
+            - "3307:3306"
+
+    backend:
+        build:
+            context: .
+            dockerfile: Dockerfile.backend
+        container_name: serviceconnect_backend
+        restart: unless-stopped
+        depends_on:
+            - mysql
+        env_file:
+            - .env.docker
+        ports:
+            - "8000:80"
+
+    frontend:
+        build:
+            context: .
+            dockerfile: Dockerfile.frontend
+            args:
+                VITE_API_BASE_URL: http://localhost:8000/api/v1
+        container_name: serviceconnect_frontend
+        restart: unless-stopped
+        depends_on:
+            - backend
+        ports:
+            - "8080:80"
+
+volumes:
+    mysql_data:

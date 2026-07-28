@@ -14,10 +14,21 @@
 .env.production
 .env.local
 .env.*.local
+.env.docker
+
+!.env.example
 
 /frontend/.env
 /frontend/.env.local
 /frontend/.env.*.local
+
+!/frontend/.env.example
+
+/frontend/.env
+/frontend/.env.local
+/frontend/.env.*.local
+/frontend/dist
+/public/build
 
 .phpunit.result.cache
 
@@ -35,3 +46,5 @@ yarn-error.log
 
 /bootstrap/cache/*.php
 !/bootstrap/cache/.gitignore
+
+serviceconnect_dump.sql
