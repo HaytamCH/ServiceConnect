@@ -63,6 +63,9 @@ jobs:
           VITE_API_BASE_URL: ${{ env.VITE_API_BASE_URL }}
         run: npm run build
 
+      - name: Préparer le fichier .env.docker pour la CI
+        run: cp .env.example .env.docker
+
       - name: Vérifier la configuration Docker Compose
         run: docker compose config
 
