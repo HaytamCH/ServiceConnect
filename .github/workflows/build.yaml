@@ -73,11 +73,11 @@ jobs:
       - name: Validate Docker Compose configuration
         env:
           APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
-          APP_URL: http://localhost:8080
+          APP_URL: http://localhost:8201
           DB_PASSWORD: ci-password
           DB_ROOT_PASSWORD: ci-root-password
           IMAGE_TAG: latest
-        run: docker compose config --quiet
+        run: docker compose --file docker-compose.production.yml config --quiet
 
   docker-build-images:
     name: Build Docker images

@@ -31,3 +31,5 @@ npm run build
 ```
 
 Le déploiement Portainer utilise directement les images GHCR. Il ne construit pas le projet sur le serveur.
+
+Le fichier de stack est `docker-compose.production.yml`. Par défaut, le frontend est publié sur le port `8201` et le backend sur le port `8200`. Les variables de configuration sont centralisées dans le modèle racine `.env.example` ; aucun fichier `.env` séparé n'est nécessaire dans `frontend/`.
