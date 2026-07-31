@@ -15,80 +15,103 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
+  DATABASE_IMAGE: ghcr.io/haytamch/serviceconnect-database
   BACKEND_IMAGE: ghcr.io/haytamch/serviceconnect-backend
   FRONTEND_IMAGE: ghcr.io/haytamch/serviceconnect-frontend
-  VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL || 'http://localhost:8000/api/v1' }}
+  VITE_API_BASE_URL: /api/v1
 
 jobs:
-  full-build-app:
-    name: Full build application
+  verify-application:
+    name: Verify application
     runs-on: ubuntu-latest
 
     steps:
-      - name: Récupérer le code
+      - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Installer PHP 8.2
+      - name: Install PHP 8.4
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.4'
           extensions: pdo_mysql, zip, mbstring
           coverage: none
 
-      - name: Installer les dépendances Laravel
+      - name: Validate Composer files
+        run: composer validate --strict
+
+      - name: Install Laravel dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
-      - name: Préparer le fichier .env Laravel
+      - name: Prepare Laravel environment
         run: |
           cp .env.example .env
           php artisan key:generate --ansi
 
-      - name: Vérifier les routes Laravel
+      - name: Check Laravel routes
         run: php artisan route:list
 
-      - name: Installer Node.js
+      - name: Run Laravel tests
+        run: php artisan test
+
+      - name: Install Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24.18'
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Installer les dépendances Vue.js
+      - name: Install Vue.js dependencies
         working-directory: frontend
         run: npm ci
 
-      - name: Build frontend Vue.js
+      - name: Build Vue.js frontend
         working-directory: frontend
         env:
           VITE_API_BASE_URL: ${{ env.VITE_API_BASE_URL }}
         run: npm run build
 
-      - name: Préparer le fichier .env.docker pour la CI
-        run: cp .env.example .env.docker
-
-      - name: Vérifier la configuration Docker Compose
-        run: docker compose config
+      - name: Validate Docker Compose configuration
+        env:
+          APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+          APP_URL: http://localhost:8080
+          DB_PASSWORD: ci-password
+          DB_ROOT_PASSWORD: ci-root-password
+          IMAGE_TAG: latest
+        run: docker compose config --quiet
 
   docker-build-images:
     name: Build Docker images
     runs-on: ubuntu-latest
-    needs: full-build-app
+    needs: verify-application
 
     steps:
-      - name: Récupérer le code
+      - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Configurer Docker Buildx
+      - name: Configure Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Connexion à GitHub Container Registry
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build et push image backend Laravel
+      - name: Build and push MariaDB image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.database
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ env.DATABASE_IMAGE }}:latest
+            ${{ env.DATABASE_IMAGE }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Laravel image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -100,7 +123,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build et push image frontend Vue.js
+      - name: Build and push Vue.js image
         uses: docker/build-push-action@v6
         with:
           context: .

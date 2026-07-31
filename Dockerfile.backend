@@ -1,11 +1,12 @@
-FROM php:8.2-apache
+FROM php:8.4-apache-bookworm
 
-RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
-    libzip-dev \
-    libonig-dev \
-    && docker-php-ext-install pdo pdo_mysql zip mbstring \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        curl \
+        libonig-dev \
+        libzip-dev \
+        unzip \
+    && docker-php-ext-install -j"$(nproc)" mbstring opcache pdo_mysql zip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -13,16 +14,29 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-COPY . .
+COPY composer.json composer.lock ./
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --no-progress \
+    --no-scripts \
+    --optimize-autoloader \
+    --prefer-dist
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+COPY --chown=www-data:www-data . .
+COPY docker/backend/entrypoint.sh /usr/local/bin/serviceconnect-entrypoint
+COPY docker/backend/initialize.sh /usr/local/bin/initialize-serviceconnect
 
-RUN chown -R www-data:www-data storage bootstrap/cache
-
-RUN a2enmod rewrite
-
-RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf
+RUN composer dump-autoload --no-dev --optimize --no-interaction \
+    && chmod +x /usr/local/bin/serviceconnect-entrypoint /usr/local/bin/initialize-serviceconnect \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && ln -s /var/www/html/storage/app/public /var/www/html/public/storage \
+    && a2enmod rewrite \
+    && sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf \
+    && printf 'ServerName localhost\n' > /etc/apache2/conf-available/servername.conf \
+    && a2enconf servername
 
 EXPOSE 80
 
+ENTRYPOINT ["/usr/local/bin/serviceconnect-entrypoint"]
 CMD ["apache2-foreground"]

@@ -11,6 +11,12 @@ class ServiceConnectSeeder extends Seeder
 {
     public function run()
     {
+        if (app()->environment('production')) {
+            throw new \LogicException(
+                'ServiceConnectSeeder réinitialise toutes les données et ne peut pas être exécuté en production.'
+            );
+        }
+
         $faker = Faker::create('fr_BE');
         $now = now();
 

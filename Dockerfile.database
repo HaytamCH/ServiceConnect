@@ -1,0 +1,3 @@
+FROM mariadb:11.4.11
+
+COPY serviceconnect_dump.sql /docker-entrypoint-initdb.d/01-serviceconnect.sql

@@ -29,5 +29,3 @@ public/build
 *.bak
 npm-debug.log
 yarn-error.log
-
-serviceconnect_dump.sql
