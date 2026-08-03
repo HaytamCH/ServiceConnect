@@ -5,6 +5,7 @@ RUN apt-get update \
         curl \
         libonig-dev \
         libzip-dev \
+        default-mysql-client \
         unzip \
     && docker-php-ext-install -j"$(nproc)" mbstring opcache pdo_mysql zip \
     && apt-get clean \

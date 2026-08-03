@@ -1,44 +1,15 @@
-x-backend-environment: &backend-environment
-  APP_NAME: ServiceConnect
-  APP_ENV: production
-  APP_KEY: ${APP_KEY:?APP_KEY must be configured in Portainer}
-  APP_DEBUG: "false"
-  APP_URL: ${APP_URL:?APP_URL must be configured in Portainer}
-  FRONTEND_URL: ${APP_URL:?APP_URL must be configured in Portainer}
-  LOG_CHANNEL: stderr
-  LOG_LEVEL: warning
-  DB_CONNECTION: mysql
-  DB_HOST: database
-  DB_PORT: "3306"
-  DB_DATABASE: ${DB_DATABASE:-serviceconnect}
-  DB_USERNAME: ${DB_USERNAME:-serviceconnect}
-  DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be configured in Portainer}
-  CACHE_STORE: file
-  FILESYSTEM_DISK: public
-  QUEUE_CONNECTION: sync
-  SESSION_DRIVER: file
-  MAIL_MAILER: log
-  MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-noreply@serviceconnect.local}
-  MAIL_FROM_NAME: ServiceConnect
-  STRIPE_KEY: ${STRIPE_KEY:-}
-  STRIPE_SECRET: ${STRIPE_SECRET:-}
-  STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
-
 services:
   database:
     image: mysql:8.0
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: ${DB_DATABASE:-serviceconnect}
-      MYSQL_USER: ${DB_USERNAME:-serviceconnect}
-      MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be configured in Portainer}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD must be configured in Portainer}
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
     volumes:
       - database_data:/var/lib/mysql
-      - ./serviceconnect_dump.sql:/docker-entrypoint-initdb.d/01-serviceconnect.sql:ro
     networks:
       - database
     healthcheck:
@@ -52,7 +23,31 @@ services:
   backend-init:
     image: ghcr.io/haytamch/serviceconnect-backend:latest
     restart: "no"
-    environment: *backend-environment
+    environment:
+      APP_NAME: ServiceConnect
+      APP_ENV: production
+      APP_KEY: ${APP_KEY:?APP_KEY must be configured in Portainer}
+      APP_DEBUG: "false"
+      APP_URL: ${APP_URL:?APP_URL must be configured in Portainer}
+      FRONTEND_URL: ${APP_URL:?APP_URL must be configured in Portainer}
+      LOG_CHANNEL: stderr
+      LOG_LEVEL: warning
+      DB_CONNECTION: mysql
+      DB_HOST: database
+      DB_PORT: "3306"
+      DB_DATABASE: ${DB_DATABASE:-serviceconnect}
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD must be configured in Portainer}
+      CACHE_STORE: file
+      FILESYSTEM_DISK: public
+      QUEUE_CONNECTION: sync
+      SESSION_DRIVER: file
+      MAIL_MAILER: log
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-noreply@serviceconnect.local}
+      MAIL_FROM_NAME: ServiceConnect
+      STRIPE_KEY: ${STRIPE_KEY:-}
+      STRIPE_SECRET: ${STRIPE_SECRET:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
     command: ["/usr/local/bin/initialize-serviceconnect"]
     depends_on:
       database:
@@ -63,7 +58,31 @@ services:
   backend:
     image: ghcr.io/haytamch/serviceconnect-backend:latest
     restart: unless-stopped
-    environment: *backend-environment
+    environment:
+      APP_NAME: ServiceConnect
+      APP_ENV: production
+      APP_KEY: ${APP_KEY:?APP_KEY must be configured in Portainer}
+      APP_DEBUG: "false"
+      APP_URL: ${APP_URL:?APP_URL must be configured in Portainer}
+      FRONTEND_URL: ${APP_URL:?APP_URL must be configured in Portainer}
+      LOG_CHANNEL: stderr
+      LOG_LEVEL: warning
+      DB_CONNECTION: mysql
+      DB_HOST: database
+      DB_PORT: "3306"
+      DB_DATABASE: ${DB_DATABASE:-serviceconnect}
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD must be configured in Portainer}
+      CACHE_STORE: file
+      FILESYSTEM_DISK: public
+      QUEUE_CONNECTION: sync
+      SESSION_DRIVER: file
+      MAIL_MAILER: log
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-noreply@serviceconnect.local}
+      MAIL_FROM_NAME: ServiceConnect
+      STRIPE_KEY: ${STRIPE_KEY:-}
+      STRIPE_SECRET: ${STRIPE_SECRET:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
     volumes:
       - public_uploads:/var/www/html/storage/app/public
     depends_on:
