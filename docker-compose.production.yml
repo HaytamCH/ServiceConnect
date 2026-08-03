@@ -26,30 +26,31 @@ x-backend-environment: &backend-environment
 
 services:
   database:
-    image: ghcr.io/haytamch/serviceconnect-database:${IMAGE_TAG:?IMAGE_TAG must be configured in Portainer}
+    image: mysql:8.0
     restart: unless-stopped
     environment:
-      MARIADB_DATABASE: ${DB_DATABASE:-serviceconnect}
-      MARIADB_USER: ${DB_USERNAME:-serviceconnect}
-      MARIADB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be configured in Portainer}
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD must be configured in Portainer}
+      MYSQL_DATABASE: ${DB_DATABASE:-serviceconnect}
+      MYSQL_USER: ${DB_USERNAME:-serviceconnect}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be configured in Portainer}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD must be configured in Portainer}
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
     volumes:
       - database_data:/var/lib/mysql
+      - ./serviceconnect_dump.sql:/docker-entrypoint-initdb.d/01-serviceconnect.sql:ro
     networks:
       - database
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
-      retries: 12
+      retries: 10
       start_period: 30s
     stop_grace_period: 1m
 
   backend-init:
-    image: ghcr.io/haytamch/serviceconnect-backend:${IMAGE_TAG:?IMAGE_TAG must be configured in Portainer}
+    image: ghcr.io/haytamch/serviceconnect-backend:latest
     restart: "no"
     environment: *backend-environment
     command: ["/usr/local/bin/initialize-serviceconnect"]
@@ -60,7 +61,7 @@ services:
       - database
 
   backend:
-    image: ghcr.io/haytamch/serviceconnect-backend:${IMAGE_TAG:?IMAGE_TAG must be configured in Portainer}
+    image: ghcr.io/haytamch/serviceconnect-backend:latest
     restart: unless-stopped
     environment: *backend-environment
     volumes:
@@ -83,7 +84,7 @@ services:
       start_period: 20s
 
   frontend:
-    image: ghcr.io/haytamch/serviceconnect-frontend:${IMAGE_TAG:?IMAGE_TAG must be configured in Portainer}
+    image: ghcr.io/haytamch/serviceconnect-frontend:latest
     restart: unless-stopped
     depends_on:
       backend:
@@ -101,10 +102,8 @@ services:
 
 volumes:
   database_data:
-    external: true
-    name: serviceconnect_mariadb_prod_data_v1
+    name: serviceconnect_mysql_prod_data_v1
   public_uploads:
-    external: true
     name: serviceconnect_public_uploads_prod_v1
 
 networks:
