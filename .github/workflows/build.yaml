@@ -73,6 +73,7 @@ jobs:
         env:
           APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
           APP_URL: http://localhost:8201
+          FRONTEND_URL: http://localhost:8201
           DB_PASSWORD: ci-password
           DB_ROOT_PASSWORD: ci-root-password
         run: docker compose --file docker-compose.production.yml config --quiet
