@@ -84,6 +84,33 @@ class PaiementController extends Controller
             ], 500);
         }
 
+        $frontendUrl = rtrim(
+            (string) config('app.frontend_url'),
+            '/'
+        );
+        $frontendHost = strtolower(
+            (string) parse_url($frontendUrl, PHP_URL_HOST)
+        );
+        $frontendScheme = strtolower(
+            (string) parse_url($frontendUrl, PHP_URL_SCHEME)
+        );
+
+        if (
+            !$frontendUrl ||
+            !filter_var($frontendUrl, FILTER_VALIDATE_URL) ||
+            (
+                app()->environment('production') &&
+                (
+                    $frontendScheme !== 'https' ||
+                    in_array($frontendHost, ['localhost', '127.0.0.1', '::1'], true)
+                )
+            )
+        ) {
+            return response()->json([
+                'message' => 'L’URL publique du frontend est mal configurée.'
+            ], 500);
+        }
+
         $paiement = Paiement::where('reservation_id', $reservation->id)->first();
 
         if ($paiement && $paiement->statut === 'accepte') {
@@ -140,8 +167,8 @@ class PaiementController extends Controller
                 'membre_id' => $user->id,
             ],
 
-            'success_url' => config('services.stripe.frontend_url') . '/mes-paiements?paiement=success&session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => config('services.stripe.frontend_url') . '/mes-reservations?paiement=cancel',
+            'success_url' => $frontendUrl . '/mes-paiements?paiement=success&session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => $frontendUrl . '/mes-reservations?paiement=cancel',
         ]);
 
         $paiement->update([

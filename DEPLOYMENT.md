@@ -1,93 +1,111 @@
 # Déploiement de ServiceConnect avec Portainer
 
-Cette configuration est prévue pour la démonstration du TFE. Les e-mails restent volontairement envoyés vers le canal Laravel `log` et sont visibles dans les logs du conteneur backend.
+Cette configuration correspond à la démonstration du TFE actuellement déployée sur `https://serviceconnect.jobsacademie.tech`. Les e-mails restent volontairement envoyés vers le canal Laravel `log` et sont visibles dans les logs du backend.
 
-## Architecture
+## Architecture actuelle
 
-- `database` utilise MariaDB 11.4 et restaure `serviceconnect_dump.sql` uniquement lorsque son volume est vide.
-- `backend-init` attend MariaDB, exécute les migrations puis le seeder de référence non destructif, et s'arrête avec le code 0.
-- `backend` démarre seulement si l'initialisation a réussi. Les photos envoyées sont conservées dans un volume distinct.
-- `frontend` sert Vue sur le port `8201` et transmet `/api/*` et `/storage/*` au backend. Le backend reste aussi disponible sur `8200` pour les contrôles directs ; MariaDB n'est jamais exposée.
-- GitHub Actions construit trois images GHCR avec les tags `latest` et SHA du commit.
+- `database` utilise l'image officielle `mysql:8.0` et le volume persistant `serviceconnect_mysql_prod_data_v1`.
+- `backend-init` attend MySQL, exécute les migrations et le seeder de production non destructif, puis s'arrête avec le code `0`.
+- `backend` expose Laravel sur le port `8200` et conserve les fichiers publics dans `serviceconnect_public_uploads_prod_v1`.
+- `frontend` expose Vue/Nginx sur le port `8201` et transmet `/api/*`, `/storage/*` et `/up` au backend.
+- GitHub Actions vérifie l'application et publie les images backend et frontend dans GHCR avec les tags `latest` et SHA du commit.
 
-## 1. Préparer GitHub Container Registry
+Le Compose actuel n'importe pas automatiquement `serviceconnect_dump.sql` dans un volume vide. Il ne faut donc jamais supprimer `serviceconnect_mysql_prod_data_v1` sans disposer d'une sauvegarde SQL vérifiée.
 
-Après le premier push sur `main`, attendre que l'action **Build ServiceConnect** soit verte. Elle publie :
+## Configuration Portainer
 
-- `ghcr.io/haytamch/serviceconnect-database:<SHA>`
-- `ghcr.io/haytamch/serviceconnect-backend:<SHA>`
-- `ghcr.io/haytamch/serviceconnect-frontend:<SHA>`
+Utiliser le dépôt Git avec :
 
-Utiliser le SHA complet du même commit pour les trois images. Si les packages GHCR sont privés, ajouter dans Portainer un registre `ghcr.io` avec le nom d'utilisateur GitHub et un Personal Access Token ayant au minimum le droit `read:packages`.
+```text
+Repository URL : https://github.com/HaytamCH/ServiceConnect.git
+Reference      : refs/heads/main
+Compose path   : docker-compose.production.yml
+```
 
-## 2. Créer les volumes dans Portainer
-
-Dans **Volumes**, créer exactement ces deux volumes avant le premier déploiement :
-
-- `serviceconnect_mariadb_prod_data_v1`
-- `serviceconnect_public_uploads_prod_v1`
-
-Ces noms sont volontairement nouveaux : ils empêchent MariaDB de réutiliser le volume MySQL 8 corrompu. Ne rattacher à cette stack ni l'ancien volume `mysql_data`, ni un volume déjà initialisé par `mysql:8.0`.
-
-## 3. Configurer les variables de la stack
-
-Dans Portainer, créer ou mettre à jour la stack depuis le dépôt Git, avec `docker-compose.production.yml` comme chemin Compose. Ajouter les variables suivantes dans **Environment variables**. Le fichier racine `.env.example` est l'unique modèle de référence ; les secrets réels restent uniquement dans Portainer :
+Configurer ces variables dans la stack :
 
 | Variable | Valeur attendue |
 | --- | --- |
-| `IMAGE_TAG` | SHA complet du commit dont l'action GitHub est verte |
-| `APP_URL` | URL frontend utilisée par le jury, par exemple `http://192.168.1.50:8201` |
+| `APP_URL` | `https://serviceconnect.jobsacademie.tech` |
+| `FRONTEND_URL` | `https://serviceconnect.jobsacademie.tech` |
 | `FRONTEND_PORT` | `8201` |
 | `BACKEND_PORT` | `8200` |
-| `APP_KEY` | résultat de `php artisan key:generate --show` |
+| `APP_KEY` | clé Laravel existante, ou résultat de `php artisan key:generate --show` |
 | `DB_DATABASE` | `serviceconnect` |
-| `DB_USERNAME` | `serviceconnect` |
-| `DB_PASSWORD` | mot de passe fort réservé à l'application |
-| `DB_ROOT_PASSWORD` | autre mot de passe fort pour MariaDB |
+| `DB_ROOT_PASSWORD` | mot de passe root du volume MySQL actuel |
 | `MAIL_FROM_ADDRESS` | par exemple `noreply@serviceconnect.local` |
+| `STRIPE_KEY` | clé publique Stripe du mode test |
+| `STRIPE_SECRET` | clé secrète Stripe du mode test |
+| `STRIPE_WEBHOOK_SECRET` | secret `whsec_...` de l'endpoint webhook déployé |
 
-Les variables Stripe sont facultatives. Les ajouter seulement si la démonstration utilise réellement Stripe : `STRIPE_KEY`, `STRIPE_SECRET` et `STRIPE_WEBHOOK_SECRET`.
+Ne jamais placer `APP_KEY`, les mots de passe ou les secrets Stripe dans Git. Le fichier racine `.env.example` est uniquement un modèle.
 
-Ne jamais placer les mots de passe, `APP_KEY` ou les clés Stripe dans Git. Il n'existe plus de `.env.docker` ni de fichier `.env` propre au frontend.
+## Redéploiement
 
-## 4. Premier déploiement
+Après un push sur `main` :
 
-1. Activer l'option Portainer permettant de récupérer les images récentes du registre.
-2. Déployer la stack.
-3. Suivre d'abord les logs de `database`. Sur un volume vide, l'import SQL doit se terminer sans erreur.
-4. Vérifier ensuite `backend-init`. Le conteneur doit afficher les migrations, le seeder, puis terminer avec le code `0`. Son état `exited (0)` est normal.
-5. Vérifier que `database`, `backend` et `frontend` sont `healthy`.
-6. Ouvrir `APP_URL`, se connecter avec un compte du dump, contrôler les annonces, une photo de profil et une action envoyant un e-mail dans les logs backend.
+1. attendre que l'action GitHub **Build ServiceConnect** soit verte ;
+2. dans Portainer, mettre à jour la stack depuis le dépôt ;
+3. activer la récupération des images récentes afin de remplacer les images `latest` en cache ;
+4. vérifier que `backend-init` termine avec `Exited (0)` ;
+5. vérifier que `database`, `backend` et `frontend` sont `healthy` ;
+6. ne supprimer aucun des deux volumes de production.
 
-Le premier import peut être plus lent que les redéploiements. Dès que le volume MariaDB contient la base, le dump n'est plus rejoué et les données créées pendant la démonstration sont conservées.
+Endpoints de contrôle :
 
-## 5. Redéploiements suivants
+```text
+https://serviceconnect.jobsacademie.tech
+https://serviceconnect.jobsacademie.tech/up
+https://serviceconnect.jobsacademie.tech/api/v1/categories
+```
 
-Après un nouveau push et une action GitHub verte :
+## Configuration Stripe
 
-1. remplacer `IMAGE_TAG` par le nouveau SHA complet ;
-2. redéployer la stack en demandant à Portainer de récupérer les images ;
-3. vérifier que `backend-init` termine avec le code `0` ;
-4. ne pas supprimer les deux volumes `prod_v1`.
+Dans le Dashboard Stripe en mode test, créer cet endpoint webhook :
 
-Les migrations sont ainsi exécutées automatiquement à chaque version, tandis que `ProductionSeeder` n'ajoute les catégories que si la table est vide. Il ne supprime et ne remplace aucune donnée.
+```text
+https://serviceconnect.jobsacademie.tech/api/v1/stripe/webhook
+```
 
-## 6. Réinitialisation exacte de la démonstration
+Écouter au minimum :
 
-Cette opération supprime les changements effectués depuis le dernier import. Elle ne doit être utilisée que pour revenir volontairement aux données contenues dans le dump versionné.
+```text
+checkout.session.completed
+checkout.session.expired
+```
 
-1. arrêter puis supprimer la stack ;
-2. supprimer uniquement `serviceconnect_mariadb_prod_data_v1` et `serviceconnect_public_uploads_prod_v1` ;
-3. recréer ces deux volumes vides avec exactement les mêmes noms ;
-4. redéployer la stack avec le même `IMAGE_TAG` validé.
+Copier le secret `whsec_...` de cet endpoint dans `STRIPE_WEBHOOK_SECRET`, puis redéployer la stack. Le secret d'un Stripe CLI local ne doit pas être utilisé sur le serveur.
 
-MariaDB réimporte alors `serviceconnect_dump.sql`. Le volume des fichiers publics est initialisé depuis l'image backend et récupère la photo de profil de démonstration versionnée.
+Dans la console du conteneur backend, contrôler l'environnement et le cache Laravel :
+
+```sh
+printenv APP_URL
+printenv FRONTEND_URL
+php artisan tinker --execute="echo config('app.url'), PHP_EOL; echo config('app.frontend_url'), PHP_EOL;"
+```
+
+Les quatre valeurs doivent être exactement :
+
+```text
+https://serviceconnect.jobsacademie.tech
+```
+
+Si le cache contient encore une ancienne valeur :
+
+```sh
+php artisan optimize:clear
+php artisan config:cache
+```
+
+Une session Stripe existante conserve ses anciennes URL de retour. Après une correction, revenir dans ServiceConnect et démarrer un nouveau paiement au lieu de réutiliser l'ancienne page Checkout.
+
+Après le paiement avec la carte de test `4242 4242 4242 4242`, vérifier dans le Dashboard Stripe que l'événement webhook a reçu une réponse HTTP `200`. Sans webhook valide, le retour vers le site peut fonctionner mais le paiement restera `en_attente` dans ServiceConnect.
 
 ## Diagnostic rapide
 
-- `backend-init` échoue sur la connexion : vérifier les quatre variables `DB_*` et l'état de santé de `database`.
-- Les logs mentionnent `/usr/sbin/mysqld 8.0.46` ou `MySQL Community Server` : Portainer utilise encore l'ancien Compose. Vérifier que le chemin est exactement `docker-compose.production.yml`, puis redéployer en récupérant les images.
-- MariaDB indique encore une corruption InnoDB : le mauvais ancien volume a été réutilisé ; contrôler le nom exact `serviceconnect_mariadb_prod_data_v1`.
-- Portainer ne peut pas télécharger une image GHCR : vérifier le registre, le PAT `read:packages`, le propriétaire `haytamch` et le `IMAGE_TAG`.
-- Le frontend affiche une erreur API : vérifier que `backend` est `healthy` et que l'image frontend a été construite avec `/api/v1`.
-- Une photo est absente après le tout premier démarrage : vérifier que `serviceconnect_public_uploads_prod_v1` était réellement vide lors de sa première utilisation.
+- Redirection Stripe vers localhost : contrôler `APP_URL`, `FRONTEND_URL`, le cache Laravel, puis créer une nouvelle session Checkout.
+- Paiement toujours `en_attente` : contrôler la livraison de `checkout.session.completed` et `STRIPE_WEBHOOK_SECRET`.
+- Erreur `FRONTEND_URL must be configured in Portainer` : ajouter explicitement la variable HTTPS dans la stack.
+- Image GHCR non mise à jour : redéployer en activant la récupération de l'image `latest`.
+- Erreur InnoDB ou redémarrage continu de MySQL : ne pas réutiliser un ancien volume corrompu et ne pas supprimer le volume de production fonctionnel.
+- Perte des données de démonstration après création d'un volume vide : restaurer une sauvegarde SQL ; le dump n'est pas importé automatiquement par le Compose actuel.

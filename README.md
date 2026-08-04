@@ -6,7 +6,7 @@ ServiceConnect est une application de démonstration réalisée pour un TFE. Ell
 
 - API Laravel 12, PHP 8.4 et Sanctum
 - interface Vue 3 et Vite 8
-- MariaDB 11.4
+- MySQL 8.0
 - Apache et Nginx dans des conteneurs Docker
 - GitHub Actions pour vérifier l'application et publier les images dans GHCR
 - Portainer pour exécuter la stack
@@ -15,7 +15,7 @@ ServiceConnect est une application de démonstration réalisée pour un TFE. Ell
 
 La procédure complète, les variables à créer, les volumes à préparer et les contrôles après déploiement sont décrits dans [DEPLOYMENT.md](DEPLOYMENT.md).
 
-Le dump `serviceconnect_dump.sql` et la photo de profil de démonstration sont volontairement versionnés : toutes les données sont fictives et doivent être restaurées à l'identique pour la présentation devant le jury.
+Le dump `serviceconnect_dump.sql` et la photo de profil de démonstration sont volontairement versionnés : toutes les données sont fictives et doivent être restaurées à l'identique pour la présentation devant le jury. Le Compose de production actuel n'importe pas automatiquement ce dump dans un volume vide : le volume MySQL et les sauvegardes doivent donc être conservés lors des redéploiements.
 
 Les e-mails utilisent volontairement `MAIL_MAILER=log`. Ils sont consultables dans les logs du conteneur backend.
 
