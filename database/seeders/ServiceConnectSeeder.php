@@ -17,6 +17,14 @@ class ServiceConnectSeeder extends Seeder
             );
         }
 
+        $demoPassword = config('demo.password');
+
+        if (! is_string($demoPassword) || $demoPassword === '') {
+            throw new \LogicException(
+                'DEMO_PASSWORD doit être défini dans le fichier .env avant d’exécuter ServiceConnectSeeder.'
+            );
+        }
+
         $faker = Faker::create('fr_BE');
         $now = now();
 
@@ -71,7 +79,7 @@ class ServiceConnectSeeder extends Seeder
             'nom' => 'Admin',
             'prenom' => 'ServiceConnect',
             'email' => 'admin@serviceconnect.be',
-            'password' => Hash::make('Password123!'),
+            'password' => Hash::make($demoPassword),
             'telephone' => '+32 470 11 22 33',
             'role' => 'administrateur',
             'statut' => 'actif',
@@ -89,7 +97,7 @@ class ServiceConnectSeeder extends Seeder
                 'nom' => $faker->lastName(),
                 'prenom' => $faker->firstName(),
                 'email' => 'membre' . $i . '@serviceconnect.test',
-                'password' => Hash::make('Password123!'),
+                'password' => Hash::make($demoPassword),
                 'telephone' => '+32 4' . $faker->numerify('## ## ## ##'),
                 'role' => 'membre',
                 'statut' => $faker->randomElement(['actif', 'actif', 'actif', 'suspendu']),
@@ -121,7 +129,7 @@ class ServiceConnectSeeder extends Seeder
                 'nom' => $faker->lastName(),
                 'prenom' => $faker->firstName(),
                 'email' => 'prestataire' . $i . '@serviceconnect.test',
-                'password' => Hash::make('Password123!'),
+                'password' => Hash::make($demoPassword),
                 'telephone' => '+32 4' . $faker->numerify('## ## ## ##'),
                 'role' => 'prestataire',
                 'statut' => 'actif',

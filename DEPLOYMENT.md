@@ -1,20 +1,51 @@
-# Déploiement de ServiceConnect avec Portainer
+# Déploiement de ServiceConnect
 
-Cette configuration correspond à la démonstration du TFE actuellement déployée sur `https://serviceconnect.jobsacademie.tech`. Les e-mails restent volontairement envoyés vers le canal Laravel `log` et sont visibles dans les logs du backend.
+Ce fichier reprend la configuration que j’utilise pour la démonstration de ServiceConnect : [https://serviceconnect.jobsacademie.tech](https://serviceconnect.jobsacademie.tech).
 
-## Architecture actuelle
+## Composition de la stack
 
-- `database` utilise l'image officielle `mysql:8.0` et le volume persistant `serviceconnect_mysql_prod_data_v1`.
-- `backend-init` attend MySQL, exécute les migrations et le seeder de production non destructif, puis s'arrête avec le code `0`.
-- `backend` expose Laravel sur le port `8200` et conserve les fichiers publics dans `serviceconnect_public_uploads_prod_v1`.
-- `frontend` expose Vue/Nginx sur le port `8201` et transmet `/api/*`, `/storage/*` et `/up` au backend.
-- GitHub Actions vérifie l'application et publie les images backend et frontend dans GHCR avec les tags `latest` et SHA du commit.
+La stack contient quatre services :
 
-Le Compose actuel n'importe pas automatiquement `serviceconnect_dump.sql` dans un volume vide. Il ne faut donc jamais supprimer `serviceconnect_mysql_prod_data_v1` sans disposer d'une sauvegarde SQL vérifiée.
+| Service | Image | Rôle |
+| --- | --- | --- |
+| `database` | `mysql:8.0` | conserve les données de l’application |
+| `backend-init` | `ghcr.io/haytamch/serviceconnect-backend:latest` | prépare la base avant le démarrage de Laravel |
+| `backend` | `ghcr.io/haytamch/serviceconnect-backend:latest` | exécute l’API Laravel avec Apache et PHP 8.4 |
+| `frontend` | `ghcr.io/haytamch/serviceconnect-frontend:latest` | sert l’interface Vue avec Nginx |
 
-## Configuration Portainer
+Le frontend utilise le port `8201` du serveur et le backend le port `8200`. MySQL reste uniquement accessible à l’intérieur du réseau Docker.
 
-Utiliser le dépôt Git avec :
+## Ordre de démarrage
+
+J’ai séparé l’initialisation de la base du conteneur principal afin d’avoir un démarrage prévisible :
+
+1. MySQL démarre et passe son healthcheck ;
+2. `backend-init` se connecte à MySQL ;
+3. si la table `users` n’existe pas, le script importe `serviceconnect_dump.sql` depuis l’image backend ;
+4. Laravel exécute les migrations avec `php artisan migrate --force` ;
+5. `ProductionSeeder` ajoute les catégories de référence seulement si elles sont absentes ;
+6. `backend-init` termine son travail avec le code `0` ;
+7. le backend démarre et répond au healthcheck `/up` ;
+8. le frontend démarre à son tour.
+
+Le statut `Exited (0)` de `backend-init` est donc normal. Sur une base déjà initialisée, le dump n’est pas importé une seconde fois et les données existantes restent en place.
+
+## Données persistantes
+
+J’utilise deux volumes nommés :
+
+```text
+serviceconnect_mysql_prod_data_v1
+serviceconnect_public_uploads_prod_v1
+```
+
+Le premier contient la base MySQL. Le second contient les fichiers publics, notamment les photos de profil. Lors d’une mise à jour, je remplace les conteneurs mais je garde ces deux volumes.
+
+Le dump inclus dans l’image permet de préparer une nouvelle base vide avec les données fictives du TFE. Pour garder les changements réalisés après le déploiement, il faut aussi prévoir une sauvegarde SQL récente.
+
+## Configuration dans Portainer
+
+La stack est liée au dépôt Git avec les paramètres suivants :
 
 ```text
 Repository URL : https://github.com/HaytamCH/ServiceConnect.git
@@ -22,36 +53,58 @@ Reference      : refs/heads/main
 Compose path   : docker-compose.production.yml
 ```
 
-Configurer ces variables dans la stack :
+Voici les variables utilisées :
 
-| Variable | Valeur attendue |
+| Variable | Valeur ou rôle |
 | --- | --- |
+| `APP_KEY` | clé Laravel conservée entre les déploiements |
 | `APP_URL` | `https://serviceconnect.jobsacademie.tech` |
 | `FRONTEND_URL` | `https://serviceconnect.jobsacademie.tech` |
 | `FRONTEND_PORT` | `8201` |
 | `BACKEND_PORT` | `8200` |
-| `APP_KEY` | clé Laravel existante, ou résultat de `php artisan key:generate --show` |
 | `DB_DATABASE` | `serviceconnect` |
-| `DB_ROOT_PASSWORD` | mot de passe root du volume MySQL actuel |
-| `MAIL_FROM_ADDRESS` | par exemple `noreply@serviceconnect.local` |
-| `STRIPE_KEY` | clé publique Stripe du mode test |
-| `STRIPE_SECRET` | clé secrète Stripe du mode test |
-| `STRIPE_WEBHOOK_SECRET` | secret `whsec_...` de l'endpoint webhook déployé |
+| `DB_ROOT_PASSWORD` | mot de passe root de la base MySQL |
+| `MAIL_FROM_ADDRESS` | adresse utilisée dans les e-mails enregistrés dans les logs |
+| `STRIPE_KEY` | clé publique Stripe de test `pk_test_...` |
+| `STRIPE_SECRET` | clé secrète Stripe de test `sk_test_...` |
+| `STRIPE_WEBHOOK_SECRET` | secret de signature `whsec_...` du webhook déployé |
 
-Ne jamais placer `APP_KEY`, les mots de passe ou les secrets Stripe dans Git. Le fichier racine `.env.example` est uniquement un modèle.
+Dans ma stack, `APP_URL` et `FRONTEND_URL` sont enregistrées sans slash final. Les mots de passe et les clés Stripe restent dans les variables Portainer et ne sont pas enregistrés dans le dépôt.
 
-## Redéploiement
+## GitHub Actions et GHCR
 
-Après un push sur `main` :
+Un push sur `main` lance le workflow **Build ServiceConnect**. Il effectue les opérations suivantes :
 
-1. attendre que l'action GitHub **Build ServiceConnect** soit verte ;
-2. dans Portainer, mettre à jour la stack depuis le dépôt ;
-3. activer la récupération des images récentes afin de remplacer les images `latest` en cache ;
-4. vérifier que `backend-init` termine avec `Exited (0)` ;
-5. vérifier que `database`, `backend` et `frontend` sont `healthy` ;
-6. ne supprimer aucun des deux volumes de production.
+1. validation de Composer et installation des dépendances Laravel ;
+2. contrôle des routes et exécution des tests PHP ;
+3. installation des dépendances du frontend et build Vue ;
+4. validation du fichier Compose ;
+5. construction des images backend et frontend ;
+6. publication des images dans GHCR avec les tags `latest` et SHA du commit.
 
-Endpoints de contrôle :
+Le push prépare donc les nouvelles images, mais il ne met pas automatiquement à jour les conteneurs du serveur.
+
+## Mise à jour d’une version
+
+Quand je publie une modification de l’application :
+
+1. je pousse le commit sur `main` ;
+2. j’attends que **Build ServiceConnect** soit entièrement vert dans GitHub Actions ;
+3. dans Portainer, la stack est mise à jour depuis le dépôt ;
+4. l’option **Pull latest image** ou **Re-pull image** récupère les nouvelles images ;
+5. la stack est redéployée en conservant les volumes ;
+6. je vérifie les états des services et les URL publiques.
+
+États attendus :
+
+```text
+database       healthy
+backend-init   exited (0)
+backend        healthy
+frontend       healthy
+```
+
+URL de contrôle :
 
 ```text
 https://serviceconnect.jobsacademie.tech
@@ -59,24 +112,40 @@ https://serviceconnect.jobsacademie.tech/up
 https://serviceconnect.jobsacademie.tech/api/v1/categories
 ```
 
-## Configuration Stripe
+## Ajouter une table à la base de données
 
-Dans le Dashboard Stripe en mode test, créer cet endpoint webhook :
+Pour ajouter une table, je crée une migration Laravel au lieu de modifier directement la base du serveur :
+
+```bash
+php artisan make:migration create_nom_de_la_table_table
+php artisan migrate
+php artisan test
+```
+
+Après avoir poussé la migration, il faut attendre la fin de GitHub Actions puis mettre à jour la stack dans Portainer. Au redéploiement, `backend-init` exécute automatiquement `php artisan migrate --force` et crée la nouvelle table.
+
+Il n’est pas nécessaire de supprimer le volume MySQL ni de réimporter tout le dump. Si la nouvelle table a besoin de données de référence, je peux les ajouter dans un seeder idempotent. Pour une future installation sur une base vide, les migrations sont exécutées après l’import du dump et créeront également cette table.
+
+## Paiement Stripe
+
+Le webhook Stripe de l’environnement de test utilise cette URL :
 
 ```text
 https://serviceconnect.jobsacademie.tech/api/v1/stripe/webhook
 ```
 
-Écouter au minimum :
+Il écoute deux événements :
 
 ```text
 checkout.session.completed
 checkout.session.expired
 ```
 
-Copier le secret `whsec_...` de cet endpoint dans `STRIPE_WEBHOOK_SECRET`, puis redéployer la stack. Le secret d'un Stripe CLI local ne doit pas être utilisé sur le serveur.
+Quand un membre paie, Laravel crée une session Stripe Checkout. Après le paiement, Stripe appelle le webhook. Laravel vérifie la signature, passe le paiement à `accepte` et enregistre la référence `pi_...`. La redirection du navigateur affiche ensuite la page « Mes paiements ».
 
-Dans la console du conteneur backend, contrôler l'environnement et le cache Laravel :
+Le secret affiché dans la destination Stripe est celui que j’utilise dans `STRIPE_WEBHOOK_SECRET`. Le secret créé par Stripe CLI sert uniquement aux tests locaux.
+
+Pour vérifier la configuration chargée par Laravel :
 
 ```sh
 printenv APP_URL
@@ -84,28 +153,20 @@ printenv FRONTEND_URL
 php artisan tinker --execute="echo config('app.url'), PHP_EOL; echo config('app.frontend_url'), PHP_EOL;"
 ```
 
-Les quatre valeurs doivent être exactement :
+Les deux URL doivent correspondre au domaine public. Dans Stripe, l’événement `checkout.session.completed` doit être livré avec un code HTTP `200`.
 
-```text
-https://serviceconnect.jobsacademie.tech
-```
+## E-mails
 
-Si le cache contient encore une ancienne valeur :
+Pour la démonstration, j’utilise `MAIL_MAILER=log`. Les e-mails ne quittent pas le serveur : leur contenu se trouve dans les logs du backend.
 
-```sh
-php artisan optimize:clear
-php artisan config:cache
-```
+## Problèmes déjà rencontrés
 
-Une session Stripe existante conserve ses anciennes URL de retour. Après une correction, revenir dans ServiceConnect et démarrer un nouveau paiement au lieu de réutiliser l'ancienne page Checkout.
-
-Après le paiement avec la carte de test `4242 4242 4242 4242`, vérifier dans le Dashboard Stripe que l'événement webhook a reçu une réponse HTTP `200`. Sans webhook valide, le retour vers le site peut fonctionner mais le paiement restera `en_attente` dans ServiceConnect.
-
-## Diagnostic rapide
-
-- Redirection Stripe vers localhost : contrôler `APP_URL`, `FRONTEND_URL`, le cache Laravel, puis créer une nouvelle session Checkout.
-- Paiement toujours `en_attente` : contrôler la livraison de `checkout.session.completed` et `STRIPE_WEBHOOK_SECRET`.
-- Erreur `FRONTEND_URL must be configured in Portainer` : ajouter explicitement la variable HTTPS dans la stack.
-- Image GHCR non mise à jour : redéployer en activant la récupération de l'image `latest`.
-- Erreur InnoDB ou redémarrage continu de MySQL : ne pas réutiliser un ancien volume corrompu et ne pas supprimer le volume de production fonctionnel.
-- Perte des données de démonstration après création d'un volume vide : restaurer une sauvegarde SQL ; le dump n'est pas importé automatiquement par le Compose actuel.
+| Problème | Solution appliquée |
+| --- | --- |
+| MySQL redémarrait avec une erreur InnoDB | utilisation d’un volume MySQL 8.0 propre, puis conservation du volume fonctionnel |
+| Le dump n’était pas disponible de façon fiable dans Portainer | ajout du dump dans l’image backend et import par `backend-init` |
+| Risque de réimporter les données | vérification de la table `users` avant l’import |
+| Le dump provenait de MariaDB | adaptation du SQL pour MySQL 8.0 |
+| Une ancienne image restait en cache | utilisation de **Re-pull image** après la fin de GitHub Actions |
+| Stripe redirigeait vers localhost | configuration de `APP_URL` et `FRONTEND_URL` avec le domaine HTTPS |
+| Le paiement restait en attente | création du webhook Stripe et installation de son secret dans Portainer |
