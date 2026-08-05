@@ -30,7 +30,7 @@ class Paiement extends Model
 
     public function membre()
     {
-        return $this->belongsTo(User::class, 'membre_id');
+        return $this->belongsTo(User::class, 'membre_id')->withTrashed();
     }
 
     public function estEnAttente()

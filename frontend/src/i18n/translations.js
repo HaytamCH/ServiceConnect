@@ -64,8 +64,6 @@ export const translations = {
         default: 'Service local',
       },
 
-
-
       categoryDescriptions: {
         bricolage: 'Petits travaux et réparations',
         nettoyage: 'Ménage, nettoyage et entretien',
@@ -121,7 +119,8 @@ export const translations = {
     },
 
     search: {
-      subtitle: 'Trouvez un prestataire de confiance selon votre besoin, votre budget et votre localisation.',
+      subtitle:
+        'Trouvez un prestataire de confiance selon votre besoin, votre budget et votre localisation.',
       filters: 'Filtres',
       reset: 'Réinitialiser',
       category: 'Catégorie',
@@ -153,7 +152,7 @@ export const translations = {
       provider: 'Prestataire',
       serviceDate: 'Date du service',
       message: 'Message',
-      viewAnnouncement: "Voir l’annonce",
+      viewAnnouncement: 'Voir l’annonce',
       noReservationTitle: 'Aucune réservation',
       noReservationText: 'Vous n’avez pas encore effectué de réservation.',
       statusPending: 'En attente',
@@ -166,6 +165,9 @@ export const translations = {
       paymentLoading: 'Redirection...',
       paymentError: 'Impossible de démarrer le paiement.',
       paymentUrlError: 'Lien de paiement Stripe introuvable.',
+      expiredAlternative:
+        'Ce créneau alternatif est expiré. Demandez une nouvelle proposition au prestataire.',
+      contactProvider: 'Contacter le prestataire',
     },
 
     announcementDetail: {
@@ -187,6 +189,12 @@ export const translations = {
       availabilities: 'Disponibilités',
       availableSlot: 'Créneau disponible',
       noAvailability: 'Aucun créneau disponible pour le moment.',
+      expiredAvailabilityTitle: 'Disponibilités expirées',
+      expiredAvailabilityText:
+        'Les créneaux proposés pour ce service sont passés. Contactez le prestataire pour lui demander une nouvelle disponibilité.',
+      expiredAvailabilityError:
+        'Cette disponibilité est expirée. Contactez le prestataire pour demander un nouveau créneau.',
+      contactProvider: 'Contacter le prestataire',
       processing: 'Traitement...',
       localProviderText: 'Prestataire local sur ServiceConnect.',
       activeProfile: 'Profil actif',
@@ -210,24 +218,29 @@ export const translations = {
 
     cookies: {
       title: 'Gestion des cookies',
-      description: 'Nous utilisons des cookies nécessaires au fonctionnement du site ainsi que des cookies facultatifs pour améliorer votre expérience, mesurer l’utilisation de la plateforme et personnaliser certains contenus.',
+      description:
+        'Nous utilisons des cookies nécessaires au fonctionnement du site ainsi que des cookies facultatifs pour améliorer votre expérience, mesurer l’utilisation de la plateforme et personnaliser certains contenus.',
       policyLink: 'Politique en matière de cookies',
       settings: 'Paramètres des cookies',
       rejectOptional: 'Refuser les cookies facultatifs',
       acceptAll: 'Autoriser tous les cookies',
       necessaryTitle: 'Cookies nécessaires',
-      necessaryText: 'Ces cookies sont indispensables au fonctionnement du site et ne peuvent pas être désactivés.',
+      necessaryText:
+        'Ces cookies sont indispensables au fonctionnement du site et ne peuvent pas être désactivés.',
       analyticsTitle: 'Cookies de mesure d’audience',
-      analyticsText: 'Ils nous aident à comprendre l’utilisation de ServiceConnect afin d’améliorer la plateforme.',
+      analyticsText:
+        'Ils nous aident à comprendre l’utilisation de ServiceConnect afin d’améliorer la plateforme.',
       personalizationTitle: 'Cookies de personnalisation',
-      personalizationText: 'Ils permettent d’adapter certaines fonctionnalités et préférences à votre utilisation.',
+      personalizationText:
+        'Ils permettent d’adapter certaines fonctionnalités et préférences à votre utilisation.',
       alwaysActive: 'Toujours actif',
       saveSettings: 'Enregistrer mes choix',
     },
 
     becomeProvider: {
       title: 'Proposez vos services locaux',
-      subtitle: 'Rejoignez ServiceConnect pour publier vos annonces, gérer vos disponibilités et recevoir des demandes de réservation.',
+      subtitle:
+        'Rejoignez ServiceConnect pour publier vos annonces, gérer vos disponibilités et recevoir des demandes de réservation.',
       whyTitle: 'Pourquoi devenir prestataire ?',
       reasonPublish: 'Publier vos annonces de services',
       reasonAvailability: 'Gérer vos disponibilités',
@@ -235,15 +248,18 @@ export const translations = {
       reasonPayments: 'Suivre vos paiements',
       reasonReviews: 'Développer votre visibilité grâce aux avis',
       createAccountTitle: 'Créer un compte prestataire',
-      createAccountText: 'Pour proposer vos services, vous devez d’abord créer un compte ou vous connecter.',
+      createAccountText:
+        'Pour proposer vos services, vous devez d’abord créer un compte ou vous connecter.',
       createProviderAccount: 'Créer un compte prestataire',
       alreadyProviderTitle: 'Vous êtes déjà prestataire',
-      alreadyProviderText: 'Votre compte prestataire est déjà actif. Vous pouvez accéder à votre tableau de bord.',
+      alreadyProviderText:
+        'Votre compte prestataire est déjà actif. Vous pouvez accéder à votre tableau de bord.',
       goDashboard: 'Accéder au dashboard',
       activateTitle: 'Activer mon profil prestataire',
       activateText: 'Complétez les informations nécessaires pour pouvoir publier vos annonces.',
       descriptionLabel: 'Description de votre profil',
-      descriptionPlaceholder: 'Ex : Prestataire spécialisé dans les petits travaux à domicile, disponible à Bruxelles et alentours.',
+      descriptionPlaceholder:
+        'Ex : Prestataire spécialisé dans les petits travaux à domicile, disponible à Bruxelles et alentours.',
       locationLabel: 'Localisation',
       phoneLabel: 'Téléphone',
       activationLoading: 'Activation...',
@@ -279,7 +295,8 @@ export const translations = {
       chooseCategory: 'Choisir une catégorie',
       priceLabel: 'Tarif horaire',
       descriptionLabel: 'Description',
-      descriptionPlaceholder: 'Décrivez votre service, vos compétences et les conditions de prestation.',
+      descriptionPlaceholder:
+        'Décrivez votre service, vos compétences et les conditions de prestation.',
       publish: 'Publier l’annonce',
       creating: 'Création...',
       categoriesLoadError: 'Impossible de charger les catégories.',
@@ -407,10 +424,12 @@ export const translations = {
       emailPlaceholder: 'votre@email.com',
 
       forgotPasswordTitle: 'Mot de passe oublié',
-      forgotPasswordSubtitle: 'Entrez votre adresse email afin de recevoir un lien de réinitialisation.',
+      forgotPasswordSubtitle:
+        'Entrez votre adresse email afin de recevoir un lien de réinitialisation.',
       forgotPasswordButton: 'Envoyer le lien',
       forgotPasswordLoading: 'Envoi en cours...',
-      forgotPasswordSuccess: 'Si cette adresse existe dans notre système, un lien de réinitialisation sera envoyé.',
+      forgotPasswordSuccess:
+        'Si cette adresse existe dans notre système, un lien de réinitialisation sera envoyé.',
       forgotPasswordError: 'Impossible de traiter la demande pour le moment.',
       backToLogin: 'Retour à la connexion',
 
@@ -438,11 +457,11 @@ export const translations = {
       service: 'Service',
       accept: 'Accepter',
       refuse: 'Refuser',
+      expiredInitialSlot: 'Le créneau initial est expiré. Proposez une nouvelle date au membre.',
       markFinished: 'Marquer terminée',
       emptyTitle: 'Aucune réservation reçue',
       emptyText: 'Vous n’avez pas encore reçu de demande de réservation.',
     },
-
 
     provider: {
       space: 'Espace prestataire',
@@ -465,7 +484,8 @@ export const translations = {
       receivedReservationsText: 'Accepter, refuser ou proposer une alternative aux demandes.',
       receivedReviewsText: 'Consulter les avis laissés par les membres.',
       receivedPaymentsText: 'Suivre les paiements liés à vos prestations.',
-      myAnnouncementsPageText: 'Consultez et gérez les services que vous proposez sur ServiceConnect.',
+      myAnnouncementsPageText:
+        'Consultez et gérez les services que vous proposez sur ServiceConnect.',
       loadingAnnouncements: 'Chargement des annonces...',
       announcementsLoadError: 'Impossible de charger vos annonces.',
       deleteAnnouncementConfirm: 'Voulez-vous vraiment supprimer cette annonce ?',
@@ -482,7 +502,6 @@ export const translations = {
       noAnnouncementTitle: 'Aucune annonce',
       noAnnouncementText: 'Vous n’avez pas encore publié d’annonce.',
     },
-
   },
 
   en: {
@@ -609,15 +628,18 @@ export const translations = {
 
     cookies: {
       title: 'Cookie management',
-      description: 'We use cookies that are necessary for the website to work, as well as optional cookies to improve your experience, measure platform usage and personalize certain content.',
+      description:
+        'We use cookies that are necessary for the website to work, as well as optional cookies to improve your experience, measure platform usage and personalize certain content.',
       policyLink: 'Cookie policy',
       settings: 'Cookie settings',
       rejectOptional: 'Reject optional cookies',
       acceptAll: 'Allow all cookies',
       necessaryTitle: 'Necessary cookies',
-      necessaryText: 'These cookies are essential for the website to function and cannot be disabled.',
+      necessaryText:
+        'These cookies are essential for the website to function and cannot be disabled.',
       analyticsTitle: 'Analytics cookies',
-      analyticsText: 'They help us understand how ServiceConnect is used in order to improve the platform.',
+      analyticsText:
+        'They help us understand how ServiceConnect is used in order to improve the platform.',
       personalizationTitle: 'Personalization cookies',
       personalizationText: 'They allow some features and preferences to be adapted to your use.',
       alwaysActive: 'Always active',
@@ -643,6 +665,12 @@ export const translations = {
       availabilities: 'Availability',
       availableSlot: 'Available slot',
       noAvailability: 'No available slot at the moment.',
+      expiredAvailabilityTitle: 'Expired availability',
+      expiredAvailabilityText:
+        'The slots offered for this service have passed. Contact the provider to request a new availability.',
+      expiredAvailabilityError:
+        'This availability has expired. Contact the provider to request a new slot.',
+      contactProvider: 'Contact the provider',
       processing: 'Processing...',
       localProviderText: 'Local provider on ServiceConnect.',
       activeProfile: 'Active profile',
@@ -656,7 +684,8 @@ export const translations = {
 
     becomeProvider: {
       title: 'Offer your local services',
-      subtitle: 'Join ServiceConnect to publish your listings, manage your availability and receive booking requests.',
+      subtitle:
+        'Join ServiceConnect to publish your listings, manage your availability and receive booking requests.',
       whyTitle: 'Why become a provider?',
       reasonPublish: 'Publish your service listings',
       reasonAvailability: 'Manage your availability',
@@ -667,12 +696,14 @@ export const translations = {
       createAccountText: 'To offer your services, you must first create an account or log in.',
       createProviderAccount: 'Create a provider account',
       alreadyProviderTitle: 'You are already a provider',
-      alreadyProviderText: 'Your provider account is already active. You can access your dashboard.',
+      alreadyProviderText:
+        'Your provider account is already active. You can access your dashboard.',
       goDashboard: 'Go to dashboard',
       activateTitle: 'Activate my provider profile',
       activateText: 'Complete the required information to publish your listings.',
       descriptionLabel: 'Profile description',
-      descriptionPlaceholder: 'Example: Provider specialized in small home repairs, available in Brussels and nearby areas.',
+      descriptionPlaceholder:
+        'Example: Provider specialized in small home repairs, available in Brussels and nearby areas.',
       locationLabel: 'Location',
       phoneLabel: 'Phone',
       activationLoading: 'Activating...',
@@ -736,6 +767,8 @@ export const translations = {
       paymentLoading: 'Redirecting...',
       paymentError: 'Unable to start the payment.',
       paymentUrlError: 'Stripe payment link not found.',
+      expiredAlternative: 'This alternative slot has expired. Ask the provider for a new proposal.',
+      contactProvider: 'Contact the provider',
     },
 
     account: {
@@ -844,7 +877,6 @@ export const translations = {
       emptyText: 'You do not have any payment linked to your services yet.',
     },
 
-
     providerReviews: {
       subtitle: 'View ratings and comments left by members.',
       loading: 'Loading reviews...',
@@ -869,6 +901,7 @@ export const translations = {
       service: 'Service',
       accept: 'Accept',
       refuse: 'Refuse',
+      expiredInitialSlot: 'The initial slot has expired. Suggest a new date to the member.',
       markFinished: 'Mark as completed',
       emptyTitle: 'No received booking',
       emptyText: 'You have not received any booking request yet.',
@@ -1087,6 +1120,12 @@ export const translations = {
       availabilities: 'Beschikbaarheden',
       availableSlot: 'Beschikbaar tijdslot',
       noAvailability: 'Momenteel geen beschikbaar tijdslot.',
+      expiredAvailabilityTitle: 'Verlopen beschikbaarheden',
+      expiredAvailabilityText:
+        'De voorgestelde tijdsloten voor deze dienst zijn verstreken. Neem contact op met de dienstverlener om een nieuw tijdslot te vragen.',
+      expiredAvailabilityError:
+        'Deze beschikbaarheid is verlopen. Neem contact op met de dienstverlener om een nieuw tijdslot te vragen.',
+      contactProvider: 'Contacteer de dienstverlener',
       processing: 'Bezig...',
       localProviderText: 'Lokale dienstverlener op ServiceConnect.',
       activeProfile: 'Actief profiel',
@@ -1110,6 +1149,8 @@ export const translations = {
       service: 'Dienst',
       accept: 'Accepteren',
       refuse: 'Weigeren',
+      expiredInitialSlot:
+        'Het oorspronkelijke tijdslot is verlopen. Stel het lid een nieuwe datum voor.',
       markFinished: 'Als voltooid markeren',
       emptyTitle: 'Geen ontvangen reservatie',
       emptyText: 'U heeft nog geen reservatieaanvraag ontvangen.',
@@ -1117,24 +1158,29 @@ export const translations = {
 
     cookies: {
       title: 'Cookiebeheer',
-      description: 'Wij gebruiken cookies die nodig zijn voor de werking van de website, evenals optionele cookies om uw ervaring te verbeteren, het gebruik van het platform te meten en bepaalde inhoud te personaliseren.',
+      description:
+        'Wij gebruiken cookies die nodig zijn voor de werking van de website, evenals optionele cookies om uw ervaring te verbeteren, het gebruik van het platform te meten en bepaalde inhoud te personaliseren.',
       policyLink: 'Cookiebeleid',
       settings: 'Cookie-instellingen',
       rejectOptional: 'Optionele cookies weigeren',
       acceptAll: 'Alle cookies toestaan',
       necessaryTitle: 'Noodzakelijke cookies',
-      necessaryText: 'Deze cookies zijn noodzakelijk voor de werking van de website en kunnen niet worden uitgeschakeld.',
+      necessaryText:
+        'Deze cookies zijn noodzakelijk voor de werking van de website en kunnen niet worden uitgeschakeld.',
       analyticsTitle: 'Analytische cookies',
-      analyticsText: 'Ze helpen ons te begrijpen hoe ServiceConnect wordt gebruikt om het platform te verbeteren.',
+      analyticsText:
+        'Ze helpen ons te begrijpen hoe ServiceConnect wordt gebruikt om het platform te verbeteren.',
       personalizationTitle: 'Personalisatiecookies',
-      personalizationText: 'Ze maken het mogelijk bepaalde functies en voorkeuren aan te passen aan uw gebruik.',
+      personalizationText:
+        'Ze maken het mogelijk bepaalde functies en voorkeuren aan te passen aan uw gebruik.',
       alwaysActive: 'Altijd actief',
       saveSettings: 'Mijn keuzes opslaan',
     },
 
     becomeProvider: {
       title: 'Bied uw lokale diensten aan',
-      subtitle: 'Word lid van ServiceConnect om advertenties te publiceren, uw beschikbaarheden te beheren en reservatieaanvragen te ontvangen.',
+      subtitle:
+        'Word lid van ServiceConnect om advertenties te publiceren, uw beschikbaarheden te beheren en reservatieaanvragen te ontvangen.',
       whyTitle: 'Waarom dienstverlener worden?',
       reasonPublish: 'Uw dienstenadvertenties publiceren',
       reasonAvailability: 'Uw beschikbaarheden beheren',
@@ -1142,7 +1188,8 @@ export const translations = {
       reasonPayments: 'Uw betalingen volgen',
       reasonReviews: 'Uw zichtbaarheid vergroten via beoordelingen',
       createAccountTitle: 'Een dienstverlenersaccount aanmaken',
-      createAccountText: 'Om uw diensten aan te bieden, moet u eerst een account aanmaken of inloggen.',
+      createAccountText:
+        'Om uw diensten aan te bieden, moet u eerst een account aanmaken of inloggen.',
       createProviderAccount: 'Dienstverlenersaccount aanmaken',
       alreadyProviderTitle: 'U bent al dienstverlener',
       alreadyProviderText: 'Uw dienstverlenersaccount is al actief. U kunt naar uw dashboard gaan.',
@@ -1150,7 +1197,8 @@ export const translations = {
       activateTitle: 'Mijn dienstverlenersprofiel activeren',
       activateText: 'Vul de nodige informatie in om uw advertenties te kunnen publiceren.',
       descriptionLabel: 'Profielbeschrijving',
-      descriptionPlaceholder: 'Voorbeeld: Dienstverlener gespecialiseerd in kleine werken aan huis, beschikbaar in Brussel en omgeving.',
+      descriptionPlaceholder:
+        'Voorbeeld: Dienstverlener gespecialiseerd in kleine werken aan huis, beschikbaar in Brussel en omgeving.',
       locationLabel: 'Locatie',
       phoneLabel: 'Telefoon',
       activationLoading: 'Activeren...',
@@ -1202,6 +1250,9 @@ export const translations = {
       paymentLoading: 'Doorverwijzen...',
       paymentError: 'Kan de betaling niet starten.',
       paymentUrlError: 'Stripe-betaallink niet gevonden.',
+      expiredAlternative:
+        'Dit alternatieve tijdslot is verlopen. Vraag de dienstverlener om een nieuw voorstel.',
+      contactProvider: 'Contacteer de dienstverlener',
     },
 
     messages: {
@@ -1258,10 +1309,12 @@ export const translations = {
       emailPlaceholder: 'uw@email.com',
 
       forgotPasswordTitle: 'Wachtwoord vergeten',
-      forgotPasswordSubtitle: 'Voer uw e-mailadres in om een link voor wachtwoordherstel te ontvangen.',
+      forgotPasswordSubtitle:
+        'Voer uw e-mailadres in om een link voor wachtwoordherstel te ontvangen.',
       forgotPasswordButton: 'Link verzenden',
       forgotPasswordLoading: 'Bezig met verzenden...',
-      forgotPasswordSuccess: 'Als dit adres in ons systeem bestaat, wordt er een resetlink verzonden.',
+      forgotPasswordSuccess:
+        'Als dit adres in ons systeem bestaat, wordt er een resetlink verzonden.',
       forgotPasswordError: 'De aanvraag kan momenteel niet worden verwerkt.',
       backToLogin: 'Terug naar aanmelden',
 
@@ -1276,7 +1329,6 @@ export const translations = {
       resetPasswordSuccess: 'Wachtwoord succesvol opnieuw ingesteld.',
       resetPasswordError: 'Het wachtwoord kan niet opnieuw worden ingesteld.',
     },
-
 
     availability: {
       subtitle: 'Voeg tijdsloten toe of verwijder ze voor leden.',
@@ -1307,7 +1359,6 @@ export const translations = {
       emptyTitle: 'Geen beschikbaarheid',
       emptyText: 'U heeft nog geen beschikbaar tijdslot toegevoegd.',
     },
-
 
     favorites: {
       breadcrumb: 'Favorieten',
@@ -1380,7 +1431,8 @@ export const translations = {
       chooseCategory: 'Kies een categorie',
       priceLabel: 'Uurtarief',
       descriptionLabel: 'Beschrijving',
-      descriptionPlaceholder: 'Beschrijf uw dienst, uw vaardigheden en de voorwaarden van de prestatie.',
+      descriptionPlaceholder:
+        'Beschrijf uw dienst, uw vaardigheden en de voorwaarden van de prestatie.',
       publish: 'Advertentie publiceren',
       creating: 'Aanmaken...',
       categoriesLoadError: 'Kan de categorieën niet laden.',

@@ -69,6 +69,12 @@ class ReservationController extends Controller
             ], 422);
         }
 
+        if ($disponibilite->expiree) {
+            return response()->json([
+                'message' => 'Cette disponibilité est expirée. Contactez le prestataire pour demander un nouveau créneau.'
+            ], 422);
+        }
+
         $reservation = Reservation::create([
             'membre_id' => $user->id,
             'annonce_id' => $annonce->id,
@@ -227,6 +233,15 @@ class ReservationController extends Controller
             }
         }
 
+        if (
+            $nouveauStatut === 'acceptee'
+            && (!$reservation->date_service || $reservation->date_service->lessThanOrEqualTo(now()))
+        ) {
+            return response()->json([
+                'message' => 'Le créneau initial est expiré. Proposez plutôt une nouvelle date au membre.'
+            ], 422);
+        }
+
         if ($nouveauStatut === 'terminee') {
             if ($reservation->statut !== 'acceptee') {
                 return response()->json([
@@ -296,7 +311,7 @@ class ReservationController extends Controller
             $disponibilite = Disponibilite::find($reservation->disponibilite_id);
 
             if ($disponibilite) {
-                $disponibilite->disponible = true;
+                $disponibilite->disponible = !$disponibilite->expiree;
                 $disponibilite->save();
             }
         }
@@ -342,6 +357,12 @@ class ReservationController extends Controller
         if (!$reservation->date_alternative_debut || !$reservation->date_alternative_fin) {
             return response()->json([
                 'message' => 'Le créneau alternatif est incomplet.'
+            ], 422);
+        }
+
+        if ($reservation->date_alternative_debut->lessThanOrEqualTo(now())) {
+            return response()->json([
+                'message' => 'Ce créneau alternatif est expiré. Contactez le prestataire pour demander une nouvelle proposition.'
             ], 422);
         }
 

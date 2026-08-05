@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 
@@ -147,6 +149,66 @@ class ProfileController extends Controller
             'message' => 'Mot de passe modifié avec succès. Veuillez vous reconnecter.'
         ]);
     }
+    public function destroy(Request $request)
+    {
+        $user = $request->user();
+
+        if (!in_array($user->role, ['membre', 'prestataire'], true)) {
+            return response()->json([
+                'message' => 'La désinscription directe est réservée aux comptes membres et prestataires.'
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'password' => 'required|string',
+            'confirmation' => 'accepted',
+        ]);
+
+        if (!Hash::check($validated['password'], $user->password)) {
+            return response()->json([
+                'message' => 'Le mot de passe est incorrect.',
+                'errors' => [
+                    'password' => ['Le mot de passe est incorrect.'],
+                ],
+            ], 422);
+        }
+
+        $userId = $user->id;
+        $reservationsConservees = $user->reservationsCommeMembre()->count();
+        $paiementsConserves = $user->paiements()->count();
+        $annoncesRetirees = $user->estPrestataire()
+            ? $user->annonces()->where('statut', '!=', 'supprimee')->count()
+            : 0;
+
+        DB::transaction(function () use ($user) {
+            if ($user->estPrestataire()) {
+                $user->annonces()->update(['statut' => 'supprimee']);
+            }
+
+            $user->tokens()->delete();
+            $user->update(['statut' => 'desactive']);
+            $user->delete();
+        });
+
+        Log::info('Compte utilisateur désinscrit par soft delete.', [
+            'user_id' => $userId,
+            'reservations_conservees' => $reservationsConservees,
+            'paiements_conserves' => $paiementsConserves,
+            'annonces_retirees' => $annoncesRetirees,
+        ]);
+
+        return response()->json([
+            'message' => 'Votre compte a été désinscrit. Vos transactions restent conservées dans l’historique.',
+            'data' => [
+                'user_id' => $userId,
+                'deleted_at' => optional($user->deleted_at)->toISOString(),
+                'reservations_conservees' => $reservationsConservees,
+                'paiements_conserves' => $paiementsConserves,
+                'annonces_retirees' => $annoncesRetirees,
+            ],
+        ]);
+    }
+
     public function devenirPrestataire(Request $request)
     {
         $user = $request->user();

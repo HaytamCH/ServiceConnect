@@ -63,6 +63,14 @@ export const useAuthStore = defineStore('auth', {
       localStorage.setItem('user', JSON.stringify(this.user))
     },
 
+    clearSession() {
+      this.token = null
+      this.user = null
+
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+    },
+
     async logout() {
       try {
         if (this.token) {
@@ -71,11 +79,7 @@ export const useAuthStore = defineStore('auth', {
       } catch (e) {
         console.warn('Déconnexion côté serveur impossible.')
       } finally {
-        this.token = null
-        this.user = null
-
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
+        this.clearSession()
       }
     },
   },

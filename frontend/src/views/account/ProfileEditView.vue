@@ -1,15 +1,22 @@
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '../../api/axios'
 import { useAuthStore } from '../../stores/auth'
 
 const auth = useAuthStore()
+const router = useRouter()
 
 const loading = ref(true)
 const saving = ref(false)
 const error = ref('')
 const success = ref('')
 const previewUrl = ref('')
+const showDeleteForm = ref(false)
+const deletePassword = ref('')
+const deleteConfirmed = ref(false)
+const deleting = ref(false)
+const deleteError = ref('')
 
 const form = ref({
   nom: '',
@@ -86,6 +93,46 @@ async function submitProfile() {
     saving.value = false
   }
 }
+
+async function deleteAccount() {
+  deleteError.value = ''
+
+  if (!deleteConfirmed.value) {
+    deleteError.value =
+      'Vous devez confirmer que vous comprenez les conséquences de la désinscription.'
+    return
+  }
+
+  const confirmed = window.confirm(
+    'Confirmez-vous la désinscription de votre compte ? Cette action vous déconnectera immédiatement.',
+  )
+
+  if (!confirmed) {
+    return
+  }
+
+  deleting.value = true
+
+  try {
+    await api.delete('/profile', {
+      data: {
+        password: deletePassword.value,
+        confirmation: deleteConfirmed.value,
+      },
+    })
+
+    auth.clearSession()
+
+    await router.replace({
+      name: 'login',
+      query: { account_deleted: '1' },
+    })
+  } catch (e) {
+    deleteError.value = e.response?.data?.message || 'Impossible de désinscrire le compte.'
+  } finally {
+    deleting.value = false
+  }
+}
 </script>
 
 <template>
@@ -98,9 +145,7 @@ async function submitProfile() {
           <p>Modifiez vos informations personnelles et votre photo de profil.</p>
         </div>
 
-        <RouterLink to="/mon-espace" class="secondary-small-btn">
-          Retour
-        </RouterLink>
+        <RouterLink to="/mon-espace" class="secondary-small-btn"> Retour </RouterLink>
       </div>
 
       <p v-if="loading">Chargement...</p>
@@ -182,11 +227,73 @@ async function submitProfile() {
             {{ saving ? 'Enregistrement...' : 'Enregistrer les modifications' }}
           </button>
 
-          <RouterLink to="/mon-espace" class="secondary-small-btn">
-            Annuler
-          </RouterLink>
+          <RouterLink to="/mon-espace" class="secondary-small-btn"> Annuler </RouterLink>
         </div>
       </form>
+
+      <section
+        v-if="!loading && auth.isMembre"
+        class="account-danger-zone"
+        aria-labelledby="delete-account-title"
+      >
+        <div>
+          <p class="danger-zone-label">Zone sensible</p>
+          <h2 id="delete-account-title">Se désinscrire</h2>
+          <p>
+            Votre accès sera désactivé, mais vos réservations et vos paiements resteront conservés
+            afin de préserver l’historique des transactions.
+          </p>
+          <p v-if="auth.isPrestataire" class="danger-zone-provider-note">
+            Vos annonces seront également retirées du catalogue public.
+          </p>
+        </div>
+
+        <button
+          v-if="!showDeleteForm"
+          type="button"
+          class="delete-account-button"
+          @click="showDeleteForm = true"
+        >
+          Demander la désinscription
+        </button>
+
+        <form v-else class="delete-account-form" @submit.prevent="deleteAccount">
+          <div class="form-group">
+            <label for="delete-account-password">Mot de passe actuel</label>
+            <input
+              id="delete-account-password"
+              v-model="deletePassword"
+              type="password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <label class="delete-account-confirmation">
+            <input v-model="deleteConfirmed" type="checkbox" required />
+            <span>
+              Je comprends que je serai déconnecté et que mon compte ne sera plus accessible.
+            </span>
+          </label>
+
+          <p v-if="deleteError" class="error-message">{{ deleteError }}</p>
+
+          <div class="delete-account-actions">
+            <button type="submit" class="delete-account-button" :disabled="deleting">
+              {{ deleting ? 'Désinscription...' : 'Confirmer la désinscription' }}
+            </button>
+
+            <button
+              type="button"
+              class="secondary-small-btn"
+              :disabled="deleting"
+              @click="showDeleteForm = false"
+            >
+              Annuler
+            </button>
+          </div>
+        </form>
+      </section>
     </div>
   </section>
 </template>

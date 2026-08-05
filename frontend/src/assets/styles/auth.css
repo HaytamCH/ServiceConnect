@@ -120,6 +120,11 @@
   font-weight: 800;
 }
 
+.success-message {
+  color: #15803d;
+  font-weight: 800;
+}
+
 @media (max-width: 760px) {
   .auth-page {
     padding: 28px;
@@ -155,7 +160,6 @@
   font-size: 18px;
   padding: 4px;
 }
-
 
 .password-rules {
   list-style: none;

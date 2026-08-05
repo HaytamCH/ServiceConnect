@@ -16,6 +16,7 @@ const form = ref({
 
 const loading = ref(false)
 const error = ref('')
+const success = ref('')
 const showPassword = ref(false)
 
 const disabledMessage = localStorage.getItem('account_disabled_message')
@@ -28,9 +29,14 @@ if (disabledMessage) {
     'Votre compte a été désactivé. Veuillez contacter le service client ou l’administrateur pour plus d’informations.'
 }
 
+if (route.query.account_deleted) {
+  success.value = 'Votre compte a été désinscrit et vous avez été déconnecté.'
+}
+
 async function submitLogin() {
   loading.value = true
   error.value = ''
+  success.value = ''
 
   try {
     await auth.login(form.value)
@@ -76,11 +82,7 @@ async function submitLogin() {
               required
             />
 
-            <button
-              type="button"
-              class="password-toggle"
-              @click="showPassword = !showPassword"
-            >
+            <button type="button" class="password-toggle" @click="showPassword = !showPassword">
               {{ showPassword ? '🙈' : '👁️' }}
             </button>
           </div>
@@ -90,12 +92,12 @@ async function submitLogin() {
           {{ error }}
         </p>
 
+        <p v-if="success" class="success-message">
+          {{ success }}
+        </p>
+
         <button class="auth-submit" type="submit" :disabled="loading">
-          {{
-            loading
-              ? language.t('auth.loginLoading')
-              : language.t('auth.loginButton')
-          }}
+          {{ loading ? language.t('auth.loginLoading') : language.t('auth.loginButton') }}
         </button>
       </form>
 

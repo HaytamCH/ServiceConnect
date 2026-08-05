@@ -28,7 +28,6 @@ onMounted(async () => {
   await markReservationNotificationsAsRead()
 })
 
-
 async function acceptAlternative(reservation) {
   acceptingAlternativeId.value = reservation.id
   error.value = ''
@@ -73,7 +72,7 @@ async function loadReservations() {
   try {
     const response = await api.get('/mes-reservations')
     reservations.value = response.data.data || response.data || []
-  } catch (e) {
+  } catch {
     error.value = language.t('reservations.loadError')
   } finally {
     loading.value = false
@@ -87,7 +86,7 @@ async function markReservationNotificationsAsRead() {
     await api.patch('/notifications/mark-as-read?type=reservation_alternative')
     await api.patch('/notifications/mark-as-read?type=reservation_terminee')
     await notifications.loadSummary()
-  } catch (e) {
+  } catch {
     console.warn('Impossible de marquer les notifications de réservation comme lues.')
   }
 }
@@ -111,8 +110,7 @@ async function payReservation(reservation) {
 
     window.location.href = checkoutUrl
   } catch (e) {
-    paymentError.value =
-      e.response?.data?.message || language.t('reservations.paymentError')
+    paymentError.value = e.response?.data?.message || language.t('reservations.paymentError')
   } finally {
     payingReservationId.value = null
   }
@@ -123,12 +121,7 @@ function formatDate(date) {
     return language.t('reservations.dateUndefined')
   }
 
-  const locale =
-    language.current === 'en'
-      ? 'en-GB'
-      : language.current === 'nl'
-        ? 'nl-BE'
-        : 'fr-BE'
+  const locale = language.current === 'en' ? 'en-GB' : language.current === 'nl' ? 'nl-BE' : 'fr-BE'
 
   return new Date(date).toLocaleString(locale)
 }
@@ -144,6 +137,25 @@ function statutLabel(statut) {
   }
 
   return labels[statut] || statut
+}
+
+function isAlternativeExpired(reservation) {
+  const startDate = new Date(reservation.date_alternative_debut)
+
+  return Number.isNaN(startDate.getTime()) || startDate <= new Date()
+}
+
+function messageLinkForReservation(reservation) {
+  return {
+    path: '/mes-messages',
+    query: {
+      destinataire_id: reservation.prestataire?.id,
+      destinataire_nom:
+        `${reservation.prestataire?.prenom || ''} ${reservation.prestataire?.nom || ''}`.trim(),
+      annonce_id: reservation.annonce?.id,
+      annonce_titre: reservation.annonce?.titre,
+    },
+  }
 }
 
 function getPaiement(reservation) {
@@ -185,9 +197,7 @@ function getAvis(reservation) {
 
 function canLeaveAvis(reservation) {
   return (
-    reservation.statut === 'terminee' &&
-    isReservationPaid(reservation) &&
-    !hasAvis(reservation)
+    reservation.statut === 'terminee' && isReservationPaid(reservation) && !hasAvis(reservation)
   )
 }
 
@@ -235,8 +245,7 @@ async function submitAvis(reservation) {
 
     await loadReservations()
   } catch (e) {
-    reviewError.value =
-      e.response?.data?.message || 'Impossible de publier cet avis.'
+    reviewError.value = e.response?.data?.message || 'Impossible de publier cet avis.'
   } finally {
     postingReviewId.value = null
   }
@@ -284,11 +293,7 @@ async function submitAvis(reservation) {
     </p>
 
     <div v-if="!loading && reservations.length" class="reservation-list">
-      <article
-        v-for="reservation in reservations"
-        :key="reservation.id"
-        class="reservation-card"
-      >
+      <article v-for="reservation in reservations" :key="reservation.id" class="reservation-card">
         <div class="reservation-main">
           <h2>
             {{ reservation.annonce?.titre || language.t('reservations.reservedService') }}
@@ -318,9 +323,7 @@ async function submitAvis(reservation) {
           >
             <strong>Nouveau créneau proposé</strong>
 
-            <p>
-              Le prestataire ne peut pas assurer le créneau initial et vous propose :
-            </p>
+            <p>Le prestataire ne peut pas assurer le créneau initial et vous propose :</p>
 
             <p>
               Du
@@ -333,6 +336,16 @@ async function submitAvis(reservation) {
               Message du prestataire :
               {{ reservation.message_alternative }}
             </p>
+
+            <div v-if="isAlternativeExpired(reservation)" class="reservation-alternative-expired">
+              <p>{{ language.t('reservations.expiredAlternative') }}</p>
+              <RouterLink
+                v-if="reservation.prestataire"
+                :to="messageLinkForReservation(reservation)"
+              >
+                {{ language.t('reservations.contactProvider') }}
+              </RouterLink>
+            </div>
           </div>
 
           <div v-if="hasAvis(reservation)" class="reservation-review-box">
@@ -342,10 +355,7 @@ async function submitAvis(reservation) {
             </p>
           </div>
 
-          <div
-            v-if="activeReviewReservationId === reservation.id"
-            class="reservation-review-form"
-          >
+          <div v-if="activeReviewReservationId === reservation.id" class="reservation-review-form">
             <div class="form-group">
               <label>Note</label>
 
@@ -375,11 +385,7 @@ async function submitAvis(reservation) {
                 :disabled="postingReviewId === reservation.id"
                 @click="submitAvis(reservation)"
               >
-                {{
-                  postingReviewId === reservation.id
-                    ? 'Publication...'
-                    : 'Publier l’avis'
-                }}
+                {{ postingReviewId === reservation.id ? 'Publication...' : 'Publier l’avis' }}
               </button>
 
               <button
@@ -399,12 +405,13 @@ async function submitAvis(reservation) {
           </span>
 
           <button
-            v-if="reservation.statut === 'alternative_proposee'"
+            v-if="
+              reservation.statut === 'alternative_proposee' && !isAlternativeExpired(reservation)
+            "
             type="button"
             class="primary-small-btn"
             :disabled="
-              acceptingAlternativeId === reservation.id ||
-              refusingAlternativeId === reservation.id
+              acceptingAlternativeId === reservation.id || refusingAlternativeId === reservation.id
             "
             @click="acceptAlternative(reservation)"
           >
@@ -420,23 +427,14 @@ async function submitAvis(reservation) {
             type="button"
             class="danger-small-btn"
             :disabled="
-              acceptingAlternativeId === reservation.id ||
-              refusingAlternativeId === reservation.id
+              acceptingAlternativeId === reservation.id || refusingAlternativeId === reservation.id
             "
             @click="rejectAlternative(reservation)"
           >
-            {{
-              refusingAlternativeId === reservation.id
-                ? 'Refus...'
-                : 'Refuser l’alternative'
-            }}
+            {{ refusingAlternativeId === reservation.id ? 'Refus...' : 'Refuser l’alternative' }}
           </button>
 
-
-          <span
-            v-if="isReservationPaid(reservation)"
-            class="status-badge accepte"
-          >
+          <span v-if="isReservationPaid(reservation)" class="status-badge accepte">
             {{ paymentLabel(reservation) }}
           </span>
 

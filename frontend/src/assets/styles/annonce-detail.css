@@ -33,7 +33,6 @@
   display: block;
 }
 
-
 .service-badge {
   display: inline-flex;
   background: #dbeafe;
@@ -191,6 +190,33 @@
 
 .muted-text {
   color: #64748b;
+}
+
+.expired-availability-notice {
+  padding: 18px;
+  border: 1px solid #fdba74;
+  border-radius: 14px;
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.expired-availability-notice strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #7c2d12;
+}
+
+.expired-availability-notice p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.expired-availability-link {
+  display: inline-flex;
+  margin-top: 12px;
+  color: #2563eb;
+  font-weight: 800;
+  text-decoration: underline;
 }
 
 @media (max-width: 1000px) {

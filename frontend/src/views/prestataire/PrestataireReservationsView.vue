@@ -5,7 +5,6 @@ import { useLanguageStore } from '../../stores/language'
 import { annonceUrl } from '../../utils/slug'
 import { useNotificationStore } from '../../stores/notifications'
 
-
 const language = useLanguageStore()
 const notifications = useNotificationStore()
 
@@ -36,7 +35,7 @@ async function loadReservations() {
     } else {
       reservations.value = []
     }
-  } catch (e) {
+  } catch {
     error.value = language.t('providerReservations.loadError')
   } finally {
     loading.value = false
@@ -49,7 +48,7 @@ async function markProviderReservationNotificationsAsRead() {
     await api.patch('/notifications/mark-as-read?type=reservation_alternative_acceptee')
     await api.patch('/notifications/mark-as-read?type=reservation_alternative_refusee')
     await notifications.loadSummary()
-  } catch (e) {
+  } catch {
     console.warn('Impossible de marquer les notifications de réservation reçue comme lues.')
   }
 }
@@ -93,11 +92,31 @@ function toggleAlternativeForm(reservation) {
   }
 }
 
+function minimumAlternativeDate() {
+  const date = new Date(Date.now() + 60 * 1000)
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000)
+
+  return localDate.toISOString().slice(0, 16)
+}
+
 async function submitAlternative(reservation) {
   const form = alternativeForms.value[reservation.id]
 
   if (!form?.date_alternative_debut || !form?.date_alternative_fin) {
     error.value = 'Veuillez indiquer le début et la fin du nouveau créneau.'
+    return
+  }
+
+  const startDate = new Date(form.date_alternative_debut)
+  const endDate = new Date(form.date_alternative_fin)
+
+  if (Number.isNaN(startDate.getTime()) || startDate <= new Date()) {
+    error.value = 'Le nouveau créneau doit commencer dans le futur.'
+    return
+  }
+
+  if (Number.isNaN(endDate.getTime()) || endDate <= startDate) {
+    error.value = 'La fin du nouveau créneau doit être postérieure à son début.'
     return
   }
 
@@ -128,14 +147,15 @@ function formatDate(date) {
     return language.t('provider.dateUndefined')
   }
 
-  const locale =
-    language.current === 'en'
-      ? 'en-GB'
-      : language.current === 'nl'
-        ? 'nl-BE'
-        : 'fr-BE'
+  const locale = language.current === 'en' ? 'en-GB' : language.current === 'nl' ? 'nl-BE' : 'fr-BE'
 
   return new Date(date).toLocaleString(locale)
+}
+
+function isReservationSlotExpired(reservation) {
+  const serviceDate = new Date(reservation.date_service)
+
+  return Number.isNaN(serviceDate.getTime()) || serviceDate <= new Date()
 }
 
 function statutLabel(statut) {
@@ -202,9 +222,7 @@ function createdAtLabel(date) {
         :key="reservation.id"
         class="prestataire-list-card reservation-provider-card"
       >
-        <div class="prestataire-list-icon">
-          📩
-        </div>
+        <div class="prestataire-list-icon">📩</div>
 
         <div class="prestataire-list-content">
           <div class="prestataire-list-top">
@@ -231,6 +249,13 @@ function createdAtLabel(date) {
             <strong>{{ formatDate(reservation.date_service) }}</strong>
           </p>
 
+          <p
+            v-if="reservation.statut === 'en_attente' && isReservationSlotExpired(reservation)"
+            class="expired-slot-note"
+          >
+            {{ language.t('providerReservations.expiredInitialSlot') }}
+          </p>
+
           <p v-if="reservation.message_demande">
             {{ language.t('reservations.message') }} :
             {{ reservation.message_demande }}
@@ -248,6 +273,7 @@ function createdAtLabel(date) {
                 <input
                   v-model="alternativeForms[reservation.id].date_alternative_debut"
                   type="datetime-local"
+                  :min="minimumAlternativeDate()"
                 />
               </div>
 
@@ -256,6 +282,10 @@ function createdAtLabel(date) {
                 <input
                   v-model="alternativeForms[reservation.id].date_alternative_fin"
                   type="datetime-local"
+                  :min="
+                    alternativeForms[reservation.id].date_alternative_debut ||
+                    minimumAlternativeDate()
+                  "
                 />
               </div>
             </div>
@@ -291,18 +321,17 @@ function createdAtLabel(date) {
 
           <div class="prestataire-list-meta">
             <span v-if="reservation.annonce">
-              🏷️ {{ reservation.annonce.categorie?.nom || language.t('providerReservations.service') }}
+              🏷️
+              {{ reservation.annonce.categorie?.nom || language.t('providerReservations.service') }}
             </span>
 
-            <span v-if="reservation.annonce?.tarif">
-              💶 {{ reservation.annonce.tarif }} €/h
-            </span>
+            <span v-if="reservation.annonce?.tarif"> 💶 {{ reservation.annonce.tarif }} €/h </span>
           </div>
         </div>
 
         <div class="prestataire-list-actions">
           <button
-            v-if="reservation.statut === 'en_attente'"
+            v-if="reservation.statut === 'en_attente' && !isReservationSlotExpired(reservation)"
             type="button"
             class="primary-small-btn"
             :disabled="updating"
@@ -342,21 +371,17 @@ function createdAtLabel(date) {
           </button>
 
           <RouterLink
-                  v-if="reservation.annonce"
-                  :to="{
-          path: annonceUrl(reservation.annonce),
-          query: { retour: 'prestataire' }
-        }"
+            v-if="reservation.annonce"
+            :to="{
+              path: annonceUrl(reservation.annonce),
+              query: { retour: 'prestataire' },
+            }"
             class="secondary-small-btn"
           >
             {{ language.t('reservations.viewAnnouncement') }}
           </RouterLink>
 
-
-          <RouterLink
-            to="/mes-messages"
-            class="secondary-small-btn"
-          >
+          <RouterLink to="/mes-messages" class="secondary-small-btn">
             {{ language.t('messages.title') }}
           </RouterLink>
         </div>

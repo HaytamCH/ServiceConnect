@@ -683,7 +683,6 @@
   background: #f1f5f9;
 }
 
-
 .message-actions {
   margin-top: 12px;
   display: flex;
@@ -710,4 +709,23 @@
 
 .reservation-alternative-box p {
   margin: 8px 0 0;
+}
+
+.reservation-alternative-expired {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #fdba74;
+  border-radius: 10px;
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.reservation-alternative-expired p {
+  margin: 0 0 8px;
+}
+
+.reservation-alternative-expired a {
+  color: #2563eb;
+  font-weight: 800;
+  text-decoration: underline;
 }

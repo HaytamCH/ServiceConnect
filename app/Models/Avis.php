@@ -25,12 +25,12 @@ class Avis extends Model
 
     public function membre()
     {
-        return $this->belongsTo(User::class, 'membre_id');
+        return $this->belongsTo(User::class, 'membre_id')->withTrashed();
     }
 
     public function prestataire()
     {
-        return $this->belongsTo(User::class, 'prestataire_id');
+        return $this->belongsTo(User::class, 'prestataire_id')->withTrashed();
     }
 
     public function annonce()

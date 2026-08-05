@@ -419,6 +419,16 @@
   cursor: not-allowed;
 }
 
+.expired-slot-note {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid #fdba74;
+  border-radius: 10px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-weight: 700;
+}
+
 .status-badge.acceptee {
   background: #dcfce7;
   color: #16a34a;

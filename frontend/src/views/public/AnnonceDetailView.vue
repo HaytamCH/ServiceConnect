@@ -28,11 +28,45 @@ const likeError = ref('')
 const shareMessage = ref('')
 const shareError = ref('')
 
+function isDisponibiliteExpired(disponibilite) {
+  if (typeof disponibilite?.expiree === 'boolean') {
+    return disponibilite.expiree
+  }
+
+  const startDate = new Date(disponibilite?.date_debut)
+
+  return Number.isNaN(startDate.getTime()) || startDate <= new Date()
+}
+
+function isDisponibiliteReservable(disponibilite) {
+  if (typeof disponibilite?.reservable === 'boolean') {
+    return disponibilite.reservable
+  }
+
+  return disponibilite?.disponible !== false && !isDisponibiliteExpired(disponibilite)
+}
+
 const availableDisponibilites = computed(() => {
   return (annonce.value?.disponibilites || [])
-    .filter((disponibilite) => disponibilite.disponible !== false)
+    .filter(isDisponibiliteReservable)
+    .sort((first, second) => new Date(first.date_debut) - new Date(second.date_debut))
     .slice(0, 3)
 })
+
+const hasExpiredDisponibilites = computed(() => {
+  return (annonce.value?.disponibilites || []).some(isDisponibiliteExpired)
+})
+
+const providerMessageLink = computed(() => ({
+  path: '/mes-messages',
+  query: {
+    destinataire_id: annonce.value?.prestataire?.id,
+    destinataire_nom:
+      `${annonce.value?.prestataire?.prenom || ''} ${annonce.value?.prestataire?.nom || ''}`.trim(),
+    annonce_id: annonce.value?.id,
+    annonce_titre: annonce.value?.titre,
+  },
+}))
 
 const backLink = computed(() => {
   if (route.query.retour === 'prestataire') {
@@ -85,13 +119,12 @@ onMounted(async () => {
     if (auth.isAuthenticated) {
       await loadCurrentLike()
     }
-  } catch (e) {
+  } catch {
     error.value = language.t('announcementDetail.loadError')
   } finally {
     loading.value = false
   }
 })
-
 
 function getProfilePhotoUrl(user) {
   return user?.photo_profil_url || ''
@@ -110,12 +143,9 @@ async function loadCurrentLike() {
       likes.find((like) => {
         const likedAnnonceId = like.annonce_id || like.annonce?.id
 
-        return (
-          like.type_cible === 'annonce' &&
-          Number(likedAnnonceId) === Number(annonce.value.id)
-        )
+        return like.type_cible === 'annonce' && Number(likedAnnonceId) === Number(annonce.value.id)
       }) || null
-  } catch (e) {
+  } catch {
     currentLike.value = null
   }
 }
@@ -157,6 +187,16 @@ async function reserveAnnonce() {
 
   if (!selectedDisponibiliteId.value) {
     reservationError.value = language.t('announcementDetail.chooseSlot')
+    return
+  }
+
+  const selectedDisponibilite = annonce.value.disponibilites.find(
+    (disponibilite) => Number(disponibilite.id) === Number(selectedDisponibiliteId.value),
+  )
+
+  if (!selectedDisponibilite || !isDisponibiliteReservable(selectedDisponibilite)) {
+    selectedDisponibiliteId.value = null
+    reservationError.value = language.t('announcementDetail.expiredAvailabilityError')
     return
   }
 
@@ -230,8 +270,7 @@ async function toggleAnnonceFavorite() {
       await loadCurrentLike()
     }
   } catch (e) {
-    likeError.value =
-      e.response?.data?.message || language.t('announcementDetail.favoriteError')
+    likeError.value = e.response?.data?.message || language.t('announcementDetail.favoriteError')
   } finally {
     likeLoading.value = false
   }
@@ -262,7 +301,7 @@ async function shareAnnonce() {
       await navigator.clipboard.writeText(shareUrl)
       shareMessage.value = language.t('announcementDetail.shareCopied')
     }
-  } catch (e) {
+  } catch {
     shareError.value = language.t('announcementDetail.shareError')
   }
 }
@@ -296,19 +335,12 @@ function getCategoryName(categorie) {
   return language.t(`home.categoryNames.${key}`)
 }
 
-
-
 function formatDate(date) {
   if (!date) {
     return ''
   }
 
-  const locale =
-    language.current === 'en'
-      ? 'en-GB'
-      : language.current === 'nl'
-        ? 'nl-BE'
-        : 'fr-BE'
+  const locale = language.current === 'en' ? 'en-GB' : language.current === 'nl' ? 'nl-BE' : 'fr-BE'
 
   return new Date(date).toLocaleString(locale)
 }
@@ -329,14 +361,11 @@ function renderStars(note) {
   const value = Number(note || 0)
   return '★'.repeat(value) + '☆'.repeat(5 - value)
 }
-
 </script>
 
 <template>
   <section class="annonce-detail-page">
-    <RouterLink :to="backLink" class="back-link">
-      ← {{ backLabel }}
-    </RouterLink>
+    <RouterLink :to="backLink" class="back-link"> ← {{ backLabel }} </RouterLink>
 
     <p v-if="loading">
       {{ language.t('announcementDetail.loading') }}
@@ -349,8 +378,6 @@ function renderStars(note) {
     <div v-if="annonce" class="detail-layout">
       <main class="detail-card">
         <div class="detail-main">
-
-
           <div class="detail-info">
             <span class="service-badge">
               {{ getCategoryName(annonce.categorie) }}
@@ -364,13 +391,9 @@ function renderStars(note) {
                 {{ annonce.prestataire?.prenom }} {{ annonce.prestataire?.nom }}
               </span>
 
-              <span>
-                📍 {{ annonce.localisation || annonce.prestataire?.localisation }}
-              </span>
+              <span> 📍 {{ annonce.localisation || annonce.prestataire?.localisation }} </span>
 
-              <span>
-                💶 {{ annonce.tarif }} €/h
-              </span>
+              <span> 💶 {{ annonce.tarif }} €/h </span>
 
               <span>
                 ⭐ {{ annonce.note_moyenne || language.t('announcementDetail.newProvider') }}
@@ -403,6 +426,17 @@ function renderStars(note) {
             </button>
           </div>
 
+          <div
+            v-else-if="hasExpiredDisponibilites && annonce.prestataire"
+            class="expired-availability-notice"
+          >
+            <strong>{{ language.t('announcementDetail.expiredAvailabilityTitle') }}</strong>
+            <p>{{ language.t('announcementDetail.expiredAvailabilityText') }}</p>
+            <RouterLink :to="providerMessageLink" class="expired-availability-link">
+              {{ language.t('announcementDetail.contactProvider') }}
+            </RouterLink>
+          </div>
+
           <p v-else class="muted-text">
             {{ language.t('announcementDetail.noAvailability') }}
           </p>
@@ -422,19 +456,7 @@ function renderStars(note) {
             }}
           </button>
 
-          <RouterLink
-            v-if="annonce.prestataire"
-            :to="{
-              path: '/mes-messages',
-              query: {
-                destinataire_id: annonce.prestataire.id,
-                destinataire_nom: `${annonce.prestataire.prenom} ${annonce.prestataire.nom}`,
-                annonce_id: annonce.id,
-                annonce_titre: annonce.titre
-              }
-            }"
-            class="secondary-action"
-          >
+          <RouterLink v-if="annonce.prestataire" :to="providerMessageLink" class="secondary-action">
             {{ language.t('common.message') }}
           </RouterLink>
 
@@ -490,11 +512,7 @@ function renderStars(note) {
           </div>
 
           <div v-if="annonce.avis?.length" class="detail-review-list">
-            <article
-              v-for="avis in annonce.avis"
-              :key="avis.id"
-              class="detail-review-card"
-            >
+            <article v-for="avis in annonce.avis" :key="avis.id" class="detail-review-card">
               <div class="detail-review-top">
                 <div>
                   <strong>{{ getReviewAuthorName(avis.membre) }}</strong>
@@ -508,11 +526,8 @@ function renderStars(note) {
             </article>
           </div>
 
-          <p v-else class="muted-text">
-            Aucun avis client visible pour le moment.
-          </p>
+          <p v-else class="muted-text">Aucun avis client visible pour le moment.</p>
         </section>
-
       </main>
 
       <aside class="provider-card">
@@ -547,8 +562,8 @@ function renderStars(note) {
             path: prestataireUrl(annonce.prestataire),
             query: {
               retour: 'annonce',
-              annonce_retour: route.fullPath
-            }
+              annonce_retour: route.fullPath,
+            },
           }"
           class="provider-profile-link"
         >

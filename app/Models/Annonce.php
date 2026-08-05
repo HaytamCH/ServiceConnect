@@ -25,7 +25,7 @@ class Annonce extends Model
 
     public function prestataire()
     {
-        return $this->belongsTo(User::class, 'prestataire_id');
+        return $this->belongsTo(User::class, 'prestataire_id')->withTrashed();
     }
 
     public function categorie()

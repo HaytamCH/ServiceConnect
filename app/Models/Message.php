@@ -24,12 +24,12 @@ class Message extends Model
 
     public function expediteur()
     {
-        return $this->belongsTo(User::class, 'expediteur_id');
+        return $this->belongsTo(User::class, 'expediteur_id')->withTrashed();
     }
 
     public function destinataire()
     {
-        return $this->belongsTo(User::class, 'destinataire_id');
+        return $this->belongsTo(User::class, 'destinataire_id')->withTrashed();
     }
 
     public function reservation()

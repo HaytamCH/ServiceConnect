@@ -22,6 +22,21 @@ class Disponibilite extends Model
         'disponible' => 'boolean',
     ];
 
+    protected $appends = [
+        'expiree',
+        'reservable',
+    ];
+
+    public function getExpireeAttribute(): bool
+    {
+        return !$this->date_debut || $this->date_debut->lessThanOrEqualTo(now());
+    }
+
+    public function getRReservableAttribute(): bool
+    {
+        return $this->disponible && !$this->expiree;
+    }
+
     public function annonce()
     {
         return $this->belongsTo(Annonce::class, 'annonce_id');
