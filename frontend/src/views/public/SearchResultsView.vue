@@ -125,7 +125,7 @@ async function loadAnnonces() {
 
     const response = await api.get('/annonces', { params })
     annonces.value = response.data.data || response.data || []
-  } catch (e) {
+  } catch {
     error.value = language.t('search.loadError')
   } finally {
     loading.value = false
@@ -163,7 +163,7 @@ onMounted(async () => {
     await loadCategories()
     syncFiltersFromUrl()
     await loadAnnonces()
-  } catch (e) {
+  } catch {
     error.value = language.t('search.dataLoadError')
     loading.value = false
   }
@@ -195,12 +195,12 @@ onMounted(async () => {
         </div>
 
         <div class="filter-group">
-          <label>Recherche</label>
+          <label>{{ language.t('search.searchLabel') }}</label>
 
           <input
             v-model="filters.search"
             type="search"
-            placeholder="Ex : bricolage, baby-sitting, coiffeur..."
+            :placeholder="language.t('search.searchPlaceholder')"
           />
         </div>
 
@@ -228,7 +228,7 @@ onMounted(async () => {
           <input
             v-model="filters.localisation"
             type="text"
-            placeholder="Ex : Bruxelles, Liège, Gent..."
+            :placeholder="language.t('search.locationPlaceholder')"
           />
         </div>
 

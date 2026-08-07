@@ -32,6 +32,7 @@ class ProfileController extends Controller
             'localisation' => 'nullable|string|max:255',
             'description_profil' => 'nullable|string',
             'photo_profil' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'remove_photo' => 'sometimes|boolean',
         ]);
 
         $data = [
@@ -44,8 +45,18 @@ class ProfileController extends Controller
             'description_profil' => $validated['description_profil'] ?? null,
         ];
 
-        if ($request->hasFile('photo_profil')) {
+        $removePhoto = $request->boolean('remove_photo');
+
+        if ($removePhoto) {
             if ($user->photo_profil) {
+                Storage::disk('public')->delete($user->photo_profil);
+            }
+
+            $data['photo_profil'] = null;
+        }
+
+        if ($request->hasFile('photo_profil')) {
+            if (!$removePhoto && $user->photo_profil) {
                 Storage::disk('public')->delete($user->photo_profil);
             }
 

@@ -198,7 +198,7 @@ function getAnnonceTitle(paiement) {
         <span>💶</span>
         <div>
           <h2>{{ formatCurrency(totalBrutRecu) }}</h2>
-          <p>Total brut reçu</p>
+          <p>{{ language.t('providerPayments.grossTotal') }}</p>
         </div>
       </article>
 
@@ -206,7 +206,7 @@ function getAnnonceTitle(paiement) {
         <span>🏦</span>
         <div>
           <h2>{{ formatCurrency(totalCommissionServiceConnect) }}</h2>
-          <p>Commission ServiceConnect estimée</p>
+          <p>{{ language.t('providerPayments.estimatedCommission') }}</p>
         </div>
       </article>
 
@@ -215,7 +215,7 @@ function getAnnonceTitle(paiement) {
         <span>✅</span>
         <div>
           <h2>{{ formatCurrency(totalNetPrestataire) }}</h2>
-          <p>Net estimé à reverser</p>
+          <p>{{ language.t('providerPayments.estimatedNet') }}</p>
         </div>
       </article>
     </section>

@@ -43,7 +43,7 @@ async function initialiseMessageFormFromRoute() {
   if (!auth.user && auth.token) {
     try {
       await auth.fetchUser()
-    } catch (e) {
+    } catch {
       console.warn('Utilisateur non rechargé.')
     }
   }
@@ -75,7 +75,7 @@ async function loadMessages() {
   try {
     const response = await api.get('/messages')
     messages.value = response.data.data || response.data || []
-  } catch (e) {
+  } catch {
     error.value = language.t('messages.loadError')
   } finally {
     loading.value = false
@@ -87,7 +87,7 @@ async function markMessagesAsRead() {
     await api.patch('/messages/mark-as-read')
     await api.patch('/notifications/mark-as-read?type=message')
     await notifications.loadSummary()
-  } catch (e) {
+  } catch {
     console.warn('Impossible de marquer les messages comme lus.')
   }
 }
@@ -117,7 +117,7 @@ function selectReplyRecipient(message) {
   const otherPerson = getOtherPerson(message)
 
   if (!otherPerson || isSelfRecipient(otherPerson.id)) {
-    error.value = 'Impossible de sélectionner ce destinataire.'
+    error.value = language.t('messages.recipientSelectError')
     return
   }
 
@@ -146,7 +146,7 @@ async function sendMessage() {
   }
 
   if (isSelfRecipient(form.value.destinataire_id)) {
-    error.value = 'Vous ne pouvez pas vous envoyer un message à vous-même.'
+    error.value = language.t('messages.selfMessageError')
     return
   }
 
@@ -295,11 +295,11 @@ function getAnnonceTitle(message) {
                 :to="annonceUrl(getLinkedAnnonce(message))"
                 class="admin-inline-link"
               >
-                Voir l’annonce : {{ getAnnonceTitle(message) }}
+                {{ language.t('messages.viewListing') }} : {{ getAnnonceTitle(message) }}
               </RouterLink>
 
               <small v-else-if="getLinkedAnnonce(message)">
-                Annonce liée : {{ getAnnonceTitle(message) }} — indisponible actuellement
+                {{ language.t('messages.linkedListingUnavailable') }} : {{ getAnnonceTitle(message) }}
               </small>
 
               <div class="message-actions">
@@ -308,7 +308,7 @@ function getAnnonceTitle(message) {
                   class="secondary-small-btn"
                   @click="selectReplyRecipient(message)"
                 >
-                  Répondre
+                  {{ language.t('messages.reply') }}
                 </button>
               </div>
             </div>

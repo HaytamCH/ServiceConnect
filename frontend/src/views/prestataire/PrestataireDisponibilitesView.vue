@@ -193,7 +193,7 @@ function getAnnonceTitle(disponibilite) {
     </p>
 
     <div class="prestataire-two-columns">
-      <form class="prestataire-form-card" @submit.prevent="submitDisponibilite">
+      <form class="prestataire-form-card" novalidate @submit.prevent="submitDisponibilite">
         <h2>{{ language.t('availability.addTitle') }}</h2>
 
         <div class="form-group">

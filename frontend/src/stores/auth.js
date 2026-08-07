@@ -1,5 +1,12 @@
 import { defineStore } from 'pinia'
 import api from '../api/axios'
+import { useLanguageStore } from './language'
+
+function applyPreferredLanguage(user) {
+  if (user?.langue) {
+    useLanguageStore().setLanguage(user.langue)
+  }
+}
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -26,6 +33,8 @@ export const useAuthStore = defineStore('auth', {
       this.token = response.data.token
       this.user = response.data.user
 
+      applyPreferredLanguage(this.user)
+
       localStorage.setItem('token', this.token)
       localStorage.setItem('user', JSON.stringify(this.user))
 
@@ -37,6 +46,8 @@ export const useAuthStore = defineStore('auth', {
 
       this.token = response.data.token
       this.user = response.data.user
+
+      applyPreferredLanguage(this.user)
 
       localStorage.setItem('token', this.token)
       localStorage.setItem('user', JSON.stringify(this.user))
@@ -60,6 +71,7 @@ export const useAuthStore = defineStore('auth', {
 
     setUser(user) {
       this.user = user
+      applyPreferredLanguage(this.user)
       localStorage.setItem('user', JSON.stringify(this.user))
     },
 

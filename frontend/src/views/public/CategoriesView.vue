@@ -97,11 +97,19 @@ function getCategoryVisual(nom) {
     }
   }
 
-  if (name.includes('cours') || name.includes('soutien') || name.includes('prof')) {
+  if (name.includes('cours') || name.includes('math') || name.includes('soutien') || name.includes('prof')) {
     return {
       icon: '📚',
       color: 'blue',
-      descriptionKey: 'default',
+      descriptionKey: 'mathematique',
+    }
+  }
+
+  if (name.includes('danse')) {
+    return {
+      icon: '💃',
+      color: 'purple',
+      descriptionKey: 'danse',
     }
   }
 
@@ -126,10 +134,10 @@ function getCategoryDescription(categorie) {
   }
 
   if (categorie.descriptionKey === 'default') {
-    return categorie.description || 'Service local disponible'
+    return categorie.description || language.t('home.categoryDescriptions.default')
   }
 
-  return categorie.description || language.t(`home.categoryDescriptions.${categorie.descriptionKey}`)
+  return language.t(`home.categoryDescriptions.${categorie.descriptionKey}`)
 }
 
 function getCategoryName(categorie) {
@@ -159,7 +167,7 @@ onMounted(async () => {
         descriptionKey: visual.descriptionKey,
       }
     })
-  } catch (e) {
+  } catch {
     error.value = language.t('home.categoriesLoadError')
   } finally {
     loading.value = false
@@ -170,18 +178,16 @@ onMounted(async () => {
 <template>
   <section class="public-page">
     <div class="public-page-header">
-      <p class="breadcrumb">ServiceConnect › Catégories</p>
+      <p class="breadcrumb">ServiceConnect › {{ language.t('categories.breadcrumb') }}</p>
 
       <div class="public-page-title-row">
         <div>
-          <h1>Toutes les catégories</h1>
-          <p>
-            Explorez les différentes catégories de services disponibles sur ServiceConnect.
-          </p>
+          <h1>{{ language.t('categories.title') }}</h1>
+          <p>{{ language.t('categories.subtitle') }}</p>
         </div>
 
         <RouterLink to="/" class="secondary-small-btn">
-          Retour accueil
+          {{ language.t('categories.backHome') }}
         </RouterLink>
       </div>
     </div>
@@ -220,8 +226,8 @@ onMounted(async () => {
     </div>
 
     <div v-if="!loading && categories.length === 0" class="empty-results">
-      <h2>Aucune catégorie</h2>
-      <p>Aucune catégorie n’est disponible pour le moment.</p>
+      <h2>{{ language.t('categories.emptyTitle') }}</h2>
+      <p>{{ language.t('categories.emptyText') }}</p>
     </div>
   </section>
 </template>

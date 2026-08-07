@@ -1,10 +1,13 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { legalPageTranslations } from '../../i18n/legalPages'
+import { useLanguageStore } from '../../stores/language'
 
 const route = useRoute()
+const language = useLanguageStore()
 
-const pages = {
+const frenchPages = {
   confidentialite: {
     breadcrumb: 'ServiceConnect › Confidentialité',
     title: 'Politique de confidentialité',
@@ -256,7 +259,10 @@ const pages = {
 }
 
 const page = computed(() => {
-  return pages[route.meta.pageKey] || pages.confidentialite
+  const pageKey = route.meta.pageKey || 'confidentialite'
+  const translatedPages = legalPageTranslations[language.current]
+
+  return translatedPages?.[pageKey] || frenchPages[pageKey] || frenchPages.confidentialite
 })
 </script>
 
@@ -270,12 +276,12 @@ const page = computed(() => {
 
     <div class="legal-layout">
       <aside class="legal-menu">
-        <RouterLink to="/confidentialite">Politique de confidentialité</RouterLink>
-        <RouterLink to="/cookies">Politique de cookies</RouterLink>
-        <RouterLink to="/confiance-securite">Confiance et sécurité</RouterLink>
-        <RouterLink to="/conditions">Conditions générales</RouterLink>
-        <RouterLink to="/mentions-legales">Mentions légales</RouterLink>
-        <RouterLink to="/centre-aide">Centre d’aide</RouterLink>
+        <RouterLink to="/confidentialite">{{ language.t('footer.privacy') }}</RouterLink>
+        <RouterLink to="/cookies">{{ language.t('footer.cookies') }}</RouterLink>
+        <RouterLink to="/confiance-securite">{{ language.t('footer.trustSecurity') }}</RouterLink>
+        <RouterLink to="/conditions">{{ language.t('footer.terms') }}</RouterLink>
+        <RouterLink to="/mentions-legales">{{ language.t('footer.legal') }}</RouterLink>
+        <RouterLink to="/centre-aide">{{ language.t('footer.helpCenter') }}</RouterLink>
       </aside>
 
       <main class="legal-card">

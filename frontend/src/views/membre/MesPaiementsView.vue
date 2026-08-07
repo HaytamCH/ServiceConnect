@@ -56,7 +56,7 @@ async function loadPaiements() {
   try {
     const response = await api.get('/mes-paiements')
     paiements.value = response.data.data || response.data || []
-  } catch (e) {
+  } catch {
     error.value = language.t('payments.loadError')
   } finally {
     loading.value = false
@@ -68,7 +68,7 @@ async function markPaymentNotificationsAsRead() {
     await api.patch('/notifications/mark-as-read?type=paiement_accepte')
     await api.patch('/notifications/mark-as-read?type=paiement_refuse')
     await notifications.loadSummary()
-  } catch (e) {
+  } catch {
     console.warn('Impossible de marquer les notifications de paiement comme lues.')
   }
 }
@@ -159,7 +159,7 @@ function methodeLabel(methode) {
         <span>💶</span>
         <div>
           <h2>{{ formatCurrency(totalPaye) }}</h2>
-          <p>Total payé</p>
+          <p>{{ language.t('payments.totalPaid') }}</p>
         </div>
       </article>
 
@@ -167,7 +167,7 @@ function methodeLabel(methode) {
         <span>✅</span>
         <div>
           <h2>{{ paiementsAcceptes.length }}</h2>
-          <p>Paiement(s) accepté(s)</p>
+          <p>{{ language.t('payments.acceptedCount') }}</p>
         </div>
       </article>
 
@@ -175,7 +175,7 @@ function methodeLabel(methode) {
         <span>⏳</span>
         <div>
           <h2>{{ paiementsEnAttente.length }}</h2>
-          <p>Paiement(s) en attente</p>
+          <p>{{ language.t('payments.pendingCount') }}</p>
         </div>
       </article>
 
@@ -183,7 +183,7 @@ function methodeLabel(methode) {
         <span>❌</span>
         <div>
           <h2>{{ paiementsRefuses.length }}</h2>
-          <p>Paiement(s) refusé(s)</p>
+          <p>{{ language.t('payments.refusedCount') }}</p>
         </div>
       </article>
     </section>

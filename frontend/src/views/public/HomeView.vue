@@ -106,11 +106,19 @@ function getCategoryVisual(nom) {
     }
   }
 
-  if (name.includes('cours') || name.includes('soutien') || name.includes('prof')) {
+  if (name.includes('cours') || name.includes('math') || name.includes('soutien') || name.includes('prof')) {
     return {
       icon: '📚',
       color: 'blue',
-      descriptionKey: 'default',
+      descriptionKey: 'mathematique',
+    }
+  }
+
+  if (name.includes('danse')) {
+    return {
+      icon: '💃',
+      color: 'purple',
+      descriptionKey: 'danse',
     }
   }
 
@@ -152,10 +160,10 @@ function getCategoryDescription(categorie) {
   }
 
   if (categorie.descriptionKey === 'default') {
-    return categorie.description || 'Service local disponible'
+    return categorie.description || language.t('home.categoryDescriptions.default')
   }
 
-  return categorie.description || language.t(`home.categoryDescriptions.${categorie.descriptionKey}`)
+  return language.t(`home.categoryDescriptions.${categorie.descriptionKey}`)
 }
 
 function getCategoryName(categorie) {
@@ -185,7 +193,7 @@ onMounted(async () => {
         descriptionKey: visual.descriptionKey,
       }
     })
-  } catch (e) {
+  } catch {
     error.value = language.t('home.categoriesLoadError')
   } finally {
     loading.value = false

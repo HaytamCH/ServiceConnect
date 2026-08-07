@@ -3,8 +3,10 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../api/axios'
 import { useAuthStore } from '../../stores/auth'
+import { useLanguageStore } from '../../stores/language'
 
 const auth = useAuthStore()
+const language = useLanguageStore()
 const router = useRouter()
 
 const loading = ref(true)
@@ -12,6 +14,9 @@ const saving = ref(false)
 const error = ref('')
 const success = ref('')
 const previewUrl = ref('')
+const photoInput = ref(null)
+const removePhotoRequested = ref(false)
+let selectedPhotoUrl = ''
 const showDeleteForm = ref(false)
 const deletePassword = ref('')
 const deleteConfirmed = ref(false)
@@ -42,8 +47,8 @@ onMounted(async () => {
     form.value.description_profil = auth.user?.description_profil || ''
 
     previewUrl.value = auth.user?.photo_profil_url || ''
-  } catch (e) {
-    error.value = 'Impossible de charger vos informations.'
+  } catch {
+    error.value = language.t('profile.loadError')
   } finally {
     loading.value = false
   }
@@ -57,8 +62,29 @@ function handlePhotoChange(event) {
     return
   }
 
+  if (selectedPhotoUrl) {
+    URL.revokeObjectURL(selectedPhotoUrl)
+  }
+
   form.value.photo_profil = file
-  previewUrl.value = URL.createObjectURL(file)
+  removePhotoRequested.value = false
+  selectedPhotoUrl = URL.createObjectURL(file)
+  previewUrl.value = selectedPhotoUrl
+}
+
+function removeProfilePhoto() {
+  if (selectedPhotoUrl) {
+    URL.revokeObjectURL(selectedPhotoUrl)
+    selectedPhotoUrl = ''
+  }
+
+  form.value.photo_profil = null
+  previewUrl.value = ''
+  removePhotoRequested.value = true
+
+  if (photoInput.value) {
+    photoInput.value.value = ''
+  }
 }
 
 async function submitProfile() {
@@ -81,14 +107,32 @@ async function submitProfile() {
       data.append('photo_profil', form.value.photo_profil)
     }
 
+    if (removePhotoRequested.value) {
+      data.append('remove_photo', '1')
+    }
+
     const response = await api.post('/profile', data)
 
     const updatedUser = response.data.data || response.data.user || response.data
 
     auth.setUser(updatedUser)
-    success.value = 'Votre profil a été mis à jour avec succès.'
+
+    if (selectedPhotoUrl) {
+      URL.revokeObjectURL(selectedPhotoUrl)
+      selectedPhotoUrl = ''
+    }
+
+    form.value.photo_profil = null
+    removePhotoRequested.value = false
+    previewUrl.value = updatedUser.photo_profil_url || ''
+
+    if (photoInput.value) {
+      photoInput.value.value = ''
+    }
+
+    success.value = language.t('profile.updateSuccess')
   } catch (e) {
-    error.value = e.response?.data?.message || 'Impossible de mettre à jour le profil.'
+    error.value = e.response?.data?.message || language.t('profile.updateError')
   } finally {
     saving.value = false
   }
@@ -98,14 +142,11 @@ async function deleteAccount() {
   deleteError.value = ''
 
   if (!deleteConfirmed.value) {
-    deleteError.value =
-      'Vous devez confirmer que vous comprenez les conséquences de la désinscription.'
+    deleteError.value = language.t('profile.confirmationRequired')
     return
   }
 
-  const confirmed = window.confirm(
-    'Confirmez-vous la désinscription de votre compte ? Cette action vous déconnectera immédiatement.',
-  )
+  const confirmed = window.confirm(language.t('profile.confirmDialog'))
 
   if (!confirmed) {
     return
@@ -128,7 +169,7 @@ async function deleteAccount() {
       query: { account_deleted: '1' },
     })
   } catch (e) {
-    deleteError.value = e.response?.data?.message || 'Impossible de désinscrire le compte.'
+    deleteError.value = e.response?.data?.message || language.t('profile.unsubscribeError')
   } finally {
     deleting.value = false
   }
@@ -140,15 +181,17 @@ async function deleteAccount() {
     <div class="account-card profile-edit-card">
       <div class="profile-edit-header">
         <div>
-          <p class="breadcrumb">Mon espace › Modifier mon profil</p>
-          <h1>Modifier mon profil</h1>
-          <p>Modifiez vos informations personnelles et votre photo de profil.</p>
+          <p class="breadcrumb">{{ language.t('profile.breadcrumb') }}</p>
+          <h1>{{ language.t('profile.title') }}</h1>
+          <p>{{ language.t('profile.subtitle') }}</p>
         </div>
 
-        <RouterLink to="/mon-espace" class="secondary-small-btn"> Retour </RouterLink>
+        <RouterLink to="/mon-espace" class="secondary-small-btn">
+          {{ language.t('profile.back') }}
+        </RouterLink>
       </div>
 
-      <p v-if="loading">Chargement...</p>
+      <p v-if="loading">{{ language.t('profile.loading') }}</p>
 
       <p v-if="error" class="error-message">
         {{ error }}
@@ -161,73 +204,91 @@ async function deleteAccount() {
       <form v-if="!loading" class="profile-edit-form" @submit.prevent="submitProfile">
         <div class="profile-photo-zone">
           <div class="profile-photo-preview user-avatar">
-            <img v-if="previewUrl" :src="previewUrl" alt="Photo de profil" />
+            <img v-if="previewUrl" :src="previewUrl" :alt="language.t('profile.photoAlt')" />
             <span v-else class="default-avatar-icon"></span>
           </div>
 
           <div>
-            <label for="photo_profil">Photo de profil</label>
+            <label for="photo_profil">{{ language.t('profile.photo') }}</label>
             <input
               id="photo_profil"
+              ref="photoInput"
               type="file"
               accept="image/jpeg,image/png,image/webp"
               @change="handlePhotoChange"
             />
-            <small>Formats acceptés : JPG, PNG, WEBP. Taille maximale : 2 Mo.</small>
+            <div class="profile-photo-actions">
+              <small>{{ language.t('profile.photoHelp') }}</small>
+
+              <button
+                v-if="previewUrl || form.photo_profil"
+                type="button"
+                class="secondary-small-btn profile-photo-remove"
+                @click="removeProfilePhoto"
+              >
+                {{ language.t('profile.removePhoto') }}
+              </button>
+            </div>
+
+            <small v-if="removePhotoRequested" class="profile-photo-removal-note">
+              {{ language.t('profile.photoRemovalPending') }}
+            </small>
           </div>
         </div>
 
         <div class="profile-form-grid">
           <div class="form-group">
-            <label>Nom</label>
+            <label>{{ language.t('profile.lastName') }}</label>
             <input v-model="form.nom" type="text" required />
           </div>
 
           <div class="form-group">
-            <label>Prénom</label>
+            <label>{{ language.t('profile.firstName') }}</label>
             <input v-model="form.prenom" type="text" required />
           </div>
 
           <div class="form-group">
-            <label>Email</label>
+            <label>{{ language.t('profile.email') }}</label>
             <input v-model="form.email" type="email" required />
           </div>
 
           <div class="form-group">
-            <label>Téléphone</label>
+            <label>{{ language.t('profile.phone') }}</label>
             <input v-model="form.telephone" type="text" />
           </div>
 
           <div class="form-group">
-            <label>Langue</label>
+            <label>{{ language.t('profile.language') }}</label>
             <select v-model="form.langue">
-              <option value="fr">Français</option>
-              <option value="en">Anglais</option>
-              <option value="nl">Néerlandais</option>
+              <option value="fr">{{ language.t('profile.french') }}</option>
+              <option value="en">{{ language.t('profile.english') }}</option>
+              <option value="nl">{{ language.t('profile.dutch') }}</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label>Localisation</label>
+            <label>{{ language.t('profile.location') }}</label>
             <input v-model="form.localisation" type="text" />
           </div>
         </div>
 
         <div class="form-group">
-          <label>Description du profil</label>
+          <label>{{ language.t('profile.description') }}</label>
           <textarea
             v-model="form.description_profil"
             rows="5"
-            placeholder="Présentez brièvement votre profil ou vos services..."
+            :placeholder="language.t('profile.descriptionPlaceholder')"
           ></textarea>
         </div>
 
         <div class="form-actions left">
           <button type="submit" class="primary-small-btn" :disabled="saving">
-            {{ saving ? 'Enregistrement...' : 'Enregistrer les modifications' }}
+            {{ saving ? language.t('profile.saving') : language.t('profile.save') }}
           </button>
 
-          <RouterLink to="/mon-espace" class="secondary-small-btn"> Annuler </RouterLink>
+          <RouterLink to="/mon-espace" class="secondary-small-btn">
+            {{ language.t('profile.cancel') }}
+          </RouterLink>
         </div>
       </form>
 
@@ -237,14 +298,11 @@ async function deleteAccount() {
         aria-labelledby="delete-account-title"
       >
         <div>
-          <p class="danger-zone-label">Zone sensible</p>
-          <h2 id="delete-account-title">Se désinscrire</h2>
-          <p>
-            Votre accès sera désactivé, mais vos réservations et vos paiements resteront conservés
-            afin de préserver l’historique des transactions.
-          </p>
+          <p class="danger-zone-label">{{ language.t('profile.dangerZone') }}</p>
+          <h2 id="delete-account-title">{{ language.t('profile.unsubscribeTitle') }}</h2>
+          <p>{{ language.t('profile.unsubscribeText') }}</p>
           <p v-if="auth.isPrestataire" class="danger-zone-provider-note">
-            Vos annonces seront également retirées du catalogue public.
+            {{ language.t('profile.providerRemovalText') }}
           </p>
         </div>
 
@@ -254,12 +312,12 @@ async function deleteAccount() {
           class="delete-account-button"
           @click="showDeleteForm = true"
         >
-          Demander la désinscription
+          {{ language.t('profile.requestUnsubscribe') }}
         </button>
 
         <form v-else class="delete-account-form" @submit.prevent="deleteAccount">
           <div class="form-group">
-            <label for="delete-account-password">Mot de passe actuel</label>
+            <label for="delete-account-password">{{ language.t('profile.currentPassword') }}</label>
             <input
               id="delete-account-password"
               v-model="deletePassword"
@@ -271,16 +329,18 @@ async function deleteAccount() {
 
           <label class="delete-account-confirmation">
             <input v-model="deleteConfirmed" type="checkbox" required />
-            <span>
-              Je comprends que je serai déconnecté et que mon compte ne sera plus accessible.
-            </span>
+            <span>{{ language.t('profile.unsubscribeConfirmation') }}</span>
           </label>
 
           <p v-if="deleteError" class="error-message">{{ deleteError }}</p>
 
           <div class="delete-account-actions">
             <button type="submit" class="delete-account-button" :disabled="deleting">
-              {{ deleting ? 'Désinscription...' : 'Confirmer la désinscription' }}
+              {{
+                deleting
+                  ? language.t('profile.unsubscribing')
+                  : language.t('profile.confirmUnsubscribe')
+              }}
             </button>
 
             <button
@@ -289,7 +349,7 @@ async function deleteAccount() {
               :disabled="deleting"
               @click="showDeleteForm = false"
             >
-              Annuler
+              {{ language.t('profile.cancel') }}
             </button>
           </div>
         </form>

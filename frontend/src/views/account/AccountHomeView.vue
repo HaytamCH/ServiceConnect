@@ -73,7 +73,7 @@ async function markNotificationTypeAsRead(type) {
   try {
     await api.patch(`/notifications/mark-as-read?type=${type}`)
     await notifications.loadSummary()
-  } catch (e) {
+  } catch {
     console.warn('Impossible de marquer cette notification comme lue.')
   }
 }
@@ -98,10 +98,10 @@ async function markNotificationTypeAsRead(type) {
       </p>
 
       <div class="account-notifications">
-        <h2>Notifications</h2>
+        <h2>{{ language.t('account.notifications.title') }}</h2>
 
         <p v-if="notifications.loading" class="muted-text">
-          Chargement des notifications...
+          {{ language.t('account.notifications.loading') }}
         </p>
 
         <div v-else-if="hasNotifications" class="notification-list">
@@ -112,7 +112,7 @@ async function markNotificationTypeAsRead(type) {
           >
             <span>💬</span>
             <strong>{{ notifications.messagesNonLus }}</strong>
-            <p>message(s) non lu(s)</p>
+            <p>{{ language.t('account.notifications.unreadMessages') }}</p>
           </RouterLink>
 
           <RouterLink
@@ -122,7 +122,7 @@ async function markNotificationTypeAsRead(type) {
           >
             <span>📩</span>
             <strong>{{ notifications.reservationsPrestataireEnAttente }}</strong>
-            <p>demande(s) de réservation en attente</p>
+            <p>{{ language.t('account.notifications.providerPendingBookings') }}</p>
           </RouterLink>
 
           <RouterLink
@@ -132,7 +132,7 @@ async function markNotificationTypeAsRead(type) {
           >
             <span>💶</span>
             <strong>{{ notifications.paiementsRecus }}</strong>
-            <p>paiement(s) reçu(s) pour vos prestations</p>
+            <p>{{ language.t('account.notifications.receivedPayments') }}</p>
           </RouterLink>
 
           <RouterLink
@@ -142,7 +142,7 @@ async function markNotificationTypeAsRead(type) {
           >
             <span>📢</span>
             <strong>{{ notifications.annoncesValidees }}</strong>
-            <p>annonce(s) validée(s) et publiée(s)</p>
+            <p>{{ language.t('account.notifications.publishedListings') }}</p>
           </RouterLink>
 
           <RouterLink
@@ -152,7 +152,7 @@ async function markNotificationTypeAsRead(type) {
           >
             <span>✅</span>
             <strong>{{ notifications.reservationsAcceptees }}</strong>
-            <p>réservation(s) acceptée(s)</p>
+            <p>{{ language.t('account.notifications.acceptedBookings') }}</p>
           </RouterLink>
 
           <RouterLink
@@ -162,7 +162,7 @@ async function markNotificationTypeAsRead(type) {
           >
             <span>❌</span>
             <strong>{{ notifications.reservationsRefusees }}</strong>
-            <p>réservation(s) refusée(s)</p>
+            <p>{{ language.t('account.notifications.refusedBookings') }}</p>
           </RouterLink>
 
           <RouterLink
@@ -172,7 +172,7 @@ async function markNotificationTypeAsRead(type) {
           >
             <span>🔁</span>
             <strong>{{ notifications.reservationsAlternatives }}</strong>
-            <p>alternative(s) proposée(s)</p>
+            <p>{{ language.t('account.notifications.proposedAlternatives') }}</p>
           </RouterLink>
 
           <RouterLink
@@ -182,7 +182,7 @@ async function markNotificationTypeAsRead(type) {
           >
             <span>🏁</span>
             <strong>{{ notifications.reservationsTerminees }}</strong>
-            <p>réservation(s) terminée(s)</p>
+            <p>{{ language.t('account.notifications.completedBookings') }}</p>
           </RouterLink>
 
           <RouterLink
@@ -192,7 +192,7 @@ async function markNotificationTypeAsRead(type) {
           >
             <span>✅</span>
             <strong>{{ notifications.reservationsPrestataireAlternativesAcceptees }}</strong>
-            <p>alternative(s) acceptée(s) par un membre</p>
+            <p>{{ language.t('account.notifications.acceptedAlternatives') }}</p>
           </RouterLink>
 
           <RouterLink
@@ -202,7 +202,7 @@ async function markNotificationTypeAsRead(type) {
           >
             <span>❌</span>
             <strong>{{ notifications.reservationsPrestataireAlternativesRefusees }}</strong>
-            <p>alternative(s) refusée(s) par un membre</p>
+            <p>{{ language.t('account.notifications.refusedAlternatives') }}</p>
           </RouterLink>
 
           <RouterLink
@@ -212,7 +212,7 @@ async function markNotificationTypeAsRead(type) {
           >
             <span>⭐</span>
             <strong>{{ notifications.avisRecus }}</strong>
-            <p>nouvel avis reçu</p>
+            <p>{{ language.t('account.notifications.receivedReview') }}</p>
           </RouterLink>
 
           <RouterLink
@@ -222,7 +222,7 @@ async function markNotificationTypeAsRead(type) {
           >
             <span>✅</span>
             <strong>{{ notifications.demandePrestataireAcceptee }}</strong>
-            <p>demande prestataire acceptée</p>
+            <p>{{ language.t('account.notifications.providerRequestAccepted') }}</p>
           </RouterLink>
 
           <RouterLink
@@ -232,7 +232,7 @@ async function markNotificationTypeAsRead(type) {
           >
             <span>❌</span>
             <strong>{{ notifications.demandePrestataireRefusee }}</strong>
-            <p>demande prestataire refusée</p>
+            <p>{{ language.t('account.notifications.providerRequestRefused') }}</p>
           </RouterLink>
 
           <RouterLink
@@ -243,7 +243,7 @@ async function markNotificationTypeAsRead(type) {
           >
             <span>🚫</span>
             <strong>{{ notifications.compteDesactive }}</strong>
-            <p>votre compte a été désactivé. Veuillez contacter le service client ou l’administrateur</p>
+            <p>{{ language.t('account.notifications.accountDisabled') }}</p>
           </RouterLink>
 
           <RouterLink
@@ -254,7 +254,7 @@ async function markNotificationTypeAsRead(type) {
           >
             <span>✅</span>
             <strong>{{ notifications.compteReactive }}</strong>
-            <p>votre compte a été réactivé</p>
+            <p>{{ language.t('account.notifications.accountReactivated') }}</p>
           </RouterLink>
 
           <RouterLink
@@ -264,7 +264,7 @@ async function markNotificationTypeAsRead(type) {
           >
             <span>📂</span>
             <strong>{{ notifications.demandesCategoriesAcceptees }}</strong>
-            <p>votre demande de catégorie a été acceptée</p>
+            <p>{{ language.t('account.notifications.categoryRequestAccepted') }}</p>
           </RouterLink>
 
           <RouterLink
@@ -274,7 +274,7 @@ async function markNotificationTypeAsRead(type) {
           >
             <span>❌</span>
             <strong>{{ notifications.demandesCategoriesRefusees }}</strong>
-            <p>votre demande de catégorie a été refusée</p>
+            <p>{{ language.t('account.notifications.categoryRequestRefused') }}</p>
           </RouterLink>
 
           <template v-if="isAdmin">
@@ -285,7 +285,7 @@ async function markNotificationTypeAsRead(type) {
             >
               <span>📂</span>
               <strong>{{ notifications.adminCategoriesAValider }}</strong>
-              <p>demande(s) de catégorie à valider</p>
+              <p>{{ language.t('account.notifications.adminCategoryRequests') }}</p>
             </RouterLink>
 
             <RouterLink
@@ -295,7 +295,7 @@ async function markNotificationTypeAsRead(type) {
             >
               <span>🧾</span>
               <strong>{{ notifications.adminDemandesPrestataires }}</strong>
-              <p>demande(s) prestataire à traiter</p>
+              <p>{{ language.t('account.notifications.adminProviderRequests') }}</p>
             </RouterLink>
 
             <RouterLink
@@ -305,7 +305,7 @@ async function markNotificationTypeAsRead(type) {
             >
               <span>📢</span>
               <strong>{{ notifications.adminAnnoncesEnAttente }}</strong>
-              <p>annonce(s) en attente de validation</p>
+              <p>{{ language.t('account.notifications.adminPendingListings') }}</p>
             </RouterLink>
 
             <RouterLink
@@ -315,7 +315,7 @@ async function markNotificationTypeAsRead(type) {
             >
               <span>⭐</span>
               <strong>{{ notifications.adminAvisAModerer }}</strong>
-              <p>avis récent(s) à surveiller</p>
+              <p>{{ language.t('account.notifications.adminRecentReviews') }}</p>
             </RouterLink>
 
             <RouterLink
@@ -325,13 +325,13 @@ async function markNotificationTypeAsRead(type) {
             >
               <span>💬</span>
               <strong>{{ notifications.adminMessagesASurveiller }}</strong>
-              <p>message(s) échangé(s) à surveiller</p>
+              <p>{{ language.t('account.notifications.adminMessages') }}</p>
             </RouterLink>
           </template>
         </div>
 
         <p v-else class="muted-text">
-          Aucune nouvelle notification.
+          {{ language.t('account.notifications.none') }}
         </p>
       </div>
 
@@ -341,7 +341,7 @@ async function markNotificationTypeAsRead(type) {
         </RouterLink>
 
         <RouterLink to="/mon-profil" class="secondary-small-btn">
-          Modifier mon profil
+          {{ language.t('account.editProfile') }}
         </RouterLink>
 
         <template v-if="isMembre">
